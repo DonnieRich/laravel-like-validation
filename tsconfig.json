@@ -1,0 +1,29 @@
+{
+    "compilerOptions": {
+        "declaration": true,
+        "declarationMap": true,
+        "module": "NodeNext",
+        "moduleResolution": "nodenext",
+        "noImplicitAny": true,
+        "outDir": "dist",
+        "preserveConstEnums": true,
+        "removeComments": true,
+        "sourceMap": true,
+        "strict": true,
+        "target": "ES6",
+        "verbatimModuleSyntax": true,
+        "typeRoots": [
+            "./types"
+        ]
+    },
+    "include": [
+        "src/**/*"
+    ],
+    "watchOptions": {
+        "excludeDirectories": [
+            "**/node_modules",
+            "_build",
+            "temp/*"
+        ]
+    }
+}
