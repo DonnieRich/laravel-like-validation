@@ -2,8 +2,9 @@
     "name": "laravel-like-validation",
     "version": "0.0.2",
     "main": "src/main.ts",
+    "type": "module",
     "scripts": {
-        "test": "echo \"Error: no test specified\" && exit 1",
+        "test": "vitest",
         "compile": "npx tsc --watch",
         "dev": "node --watch dist/main.js"
     },
@@ -11,6 +12,10 @@
     "license": "ISC",
     "description": "",
     "devDependencies": {
-        "typescript": "^5.7.2"
+        "typescript": "^5.7.2",
+        "vitest": "^2.1.8"
+    },
+    "dependencies": {
+        "regex-parser": "^2.3.0"
     }
 }
