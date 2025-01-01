@@ -20,4 +20,4 @@ abstract class BaseRule {
     }
 }
 
-export = BaseRule
+export default BaseRule

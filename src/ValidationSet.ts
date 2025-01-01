@@ -1,5 +1,5 @@
-import BaseRule = require('./base/BaseRule');
-import BaseValidationSet = require('./base/BaseValidationSet');
+import BaseRule from './base/BaseRule.js';
+import BaseValidationSet from './base/BaseValidationSet.js';
 
 class ValidationSet extends BaseValidationSet {
 
@@ -17,4 +17,4 @@ class ValidationSet extends BaseValidationSet {
 
 }
 
-export = ValidationSet
+export default ValidationSet

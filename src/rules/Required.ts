@@ -1,4 +1,4 @@
-import BaseRule = require("../base/BaseRule");
+import BaseRule from "../base/BaseRule.js";
 
 class Required extends BaseRule {
     error = 'The {field} field is required';
@@ -24,4 +24,4 @@ class Required extends BaseRule {
 
 }
 
-export = Required
+export default Required

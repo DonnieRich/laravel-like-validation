@@ -1,11 +1,7 @@
-import type { IValidation } from "./contracts/IValidation";
-// import type { IValidator as Validator } from "./contracts/IValidator";
-// import type { IValidationError } from "./contracts/IValidationError";
-import ValidationError = require("./errors/ValidationError");
-import type Validator = require("./Validator");
-import type { IValidationRequest as ValidationRequest } from "./contracts/IValidationRequest"
-
-// import ValidationSet = require("./ValidationSet");
+import type { IValidation } from "./contracts/IValidation.js";
+import ValidationError from "./errors/ValidationError.js";
+import type Validator from "./Validator.js";
+import type { IValidationRequest } from "./contracts/IValidationRequest.js"
 
 
 class Validation implements IValidation {
@@ -34,7 +30,7 @@ class Validation implements IValidation {
 
     init() {
 
-        return (req: ValidationRequest, res: Response, next: Function) => {
+        return (req: IValidationRequest, res: Response, next: Function) => {
 
             let result: { status: number, errors: object } = {
                 status: 422,
@@ -48,7 +44,6 @@ class Validation implements IValidation {
                     result.status = error.status ?? 422;
 
                     if (exit) {
-                        // this.validationError.setErrors(error);
                         throw new this.validationError(error);
                     } else {
                         result.errors = this.mergeErrors(error, result.errors)
@@ -57,7 +52,6 @@ class Validation implements IValidation {
                 });
 
                 if (Object.keys(result.errors).length > 0) {
-                    // this.validationError.setErrors(result.errors);
                     throw new this.validationError(result.errors);
                 }
 

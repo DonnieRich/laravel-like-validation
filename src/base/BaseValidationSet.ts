@@ -1,7 +1,8 @@
-import type { IValidationSet } from "../contracts/IValidationSet";
-import Required = require("../rules/Required");
-import type { RulesSet } from "../types/RulesSet";
-import BaseRule = require("./BaseRule");
+import type { IValidationSet } from "../contracts/IValidationSet.js";
+import RegexMatch from "../rules/RegexMatch.js";
+import Required from "../rules/Required.js";
+import type { RulesSet } from "../types/RulesSet.js";
+import BaseRule from "./BaseRule.js";
 
 abstract class BaseValidationSet implements IValidationSet {
     protected rules: RulesSet;
@@ -12,9 +13,11 @@ abstract class BaseValidationSet implements IValidationSet {
 
     private defaultRules(): RulesSet {
         const required = new Required();
+        const regexMatch = new RegexMatch();
 
         return {
-            [required.getName()]: required
+            [required.getName()]: required,
+            [regexMatch.getName()]: regexMatch,
         };
     }
 
@@ -33,4 +36,4 @@ abstract class BaseValidationSet implements IValidationSet {
     }
 }
 
-export = BaseValidationSet
+export default BaseValidationSet

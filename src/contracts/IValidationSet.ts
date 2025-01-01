@@ -1,4 +1,4 @@
-import type { RulesSet } from "../types/RulesSet";
+import type { RulesSet } from "../types/RulesSet.js";
 
 export interface IValidationSet {
     getRules: () => RulesSet;

@@ -1,17 +1,10 @@
-export interface IValidator {
-    errors: object;
-    rules: object;
-    messages: object;
-    attributes: object;
-    fail: (error: object, exit: boolean) => void;
+import type { IRuleObject } from "./IRuleObject.js";
+import type { IValidationRequest } from "./IValidationRequest.js";
 
-    beforeValidate: () => void;
-    afterValidate: () => void;
-    addError: (key: string, error: { name: string, message: string }) => void;
-    getRule: (rule: string, key: string) => object;
-    applyValidation: (req: object) => void;
-    validateBody: (req: object) => void;
-    validateParams: (req: object) => void;
-    validateQuery: (req: object) => void;
-    validate: (req: object, fail: (error: object, exit: boolean) => void) => void;
+export interface IValidator {
+
+    getRules: () => IRuleObject;
+    getMessages: () => { [k: string]: string };
+    getAttributes: () => { [k: string]: string };
+    validate: (req: IValidationRequest, fail: (error: object, exit: boolean) => void) => void;
 }

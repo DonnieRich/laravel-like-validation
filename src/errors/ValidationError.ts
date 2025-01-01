@@ -1,4 +1,4 @@
-import type { IValidationError } from "../contracts/IValidationError"
+import type { IValidationError } from "../contracts/IValidationError.js"
 
 class ValidationError extends Error implements IValidationError {
     status: number = 422;
@@ -10,4 +10,4 @@ class ValidationError extends Error implements IValidationError {
     }
 }
 
-export = ValidationError
+export default ValidationError

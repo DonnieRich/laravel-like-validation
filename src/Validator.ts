@@ -1,21 +1,12 @@
-import BaseRule = require("./base/BaseRule");
-import type { IValidationSet } from "./contracts/IValidationSet";
-import type { IValidationRequest as ValidationRequest } from "./contracts/IValidationRequest"
-import ValidationSet = require("./ValidationSet");
+import BaseRule from "./base/BaseRule.js";
+import type { IValidationSet } from "./contracts/IValidationSet.js";
+import type { IValidationRequest } from "./contracts/IValidationRequest.js"
+import ValidationSet from "./ValidationSet.js";
+import type { IRuleObject } from "./contracts/IRuleObject.js";
+import type { IParsedRule } from "./contracts/IParsedRule.js";
+import type { IValidator } from "./contracts/IValidator.js";
 
-declare interface ParsedRule {
-    rule: string | null
-    callValidation: () => boolean
-    callMessage: (() => { name: string, message: string }) | null
-}
-
-declare interface Rules {
-    body: { [k: string]: string | [string, Function, BaseRule] }
-    params: { [k: string]: string | [string, Function, BaseRule] }
-    query: { [k: string]: string | [string, Function, BaseRule] }
-}
-
-abstract class Validator {
+abstract class Validator implements IValidator {
     private validationSet: IValidationSet;
 
     private errors: {
@@ -28,7 +19,7 @@ abstract class Validator {
             query: {}
         };
 
-    protected rules: Rules = {
+    protected rules: IRuleObject = {
         body: {},
         params: {},
         query: {}
@@ -42,7 +33,7 @@ abstract class Validator {
         [k: string]: string
     } = {};
 
-    fail: (error: object, exit: boolean) => void = (error, exit = false) => { return };
+    protected fail: (error: object, exit: boolean) => void = (error, exit = false) => { return };
 
     private data: {} = {};
 
@@ -59,16 +50,18 @@ abstract class Validator {
         this.attributes = this.getAttributes();
     }
 
-    public getRules(): Rules {
+    public getRules(): IRuleObject {
         return {
             body: {},
             params: {},
             query: {}
         }
     }
+
     public getMessages(): { [k: string]: string } {
         return {}
     }
+
     public getAttributes(): { [k: string]: string } {
         return {}
     }
@@ -117,10 +110,10 @@ abstract class Validator {
         this.errors[this.currentValidation][key] = { [error.name]: error.message, ...this.errors[this.currentValidation][key] };
     }
 
-    private getRule(rule: string | Function | BaseRule | [BaseRule, any], key: string): ParsedRule {
+    private getRule(rule: string | Function | BaseRule | [BaseRule, any], key: string): IParsedRule {
         const field = this.attributes[key] ?? key;
 
-        const result: ParsedRule = {
+        const result: IParsedRule = {
             rule: null,
             callValidation: () => false,
             callMessage: null
@@ -239,7 +232,7 @@ abstract class Validator {
         }
     }
 
-    public validate(req: ValidationRequest, fail: (error: object, exit: boolean) => void): void {
+    public validate(req: IValidationRequest, fail: (error: object, exit: boolean) => void): void {
         this.fail = fail;
 
         this.beforeValidate();
@@ -254,4 +247,4 @@ abstract class Validator {
     }
 }
 
-export = Validator
+export default Validator
