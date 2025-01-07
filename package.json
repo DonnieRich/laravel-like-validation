@@ -1,12 +1,15 @@
 {
-    "name": "laravel-like-validation",
-    "version": "0.0.4",
-    "main": "./src/main.ts",
+    "name": "@ricciodev/laravel-like-validation",
+    "version": "0.1.0-alpha",
+    "main": "./dist/llv.cjs",
+    "module": "./dist/llv.js",
     "type": "module",
     "scripts": {
         "test": "vitest",
         "compile": "npx tsc --watch",
-        "dev": "node --watch dist/main.js"
+        "dev": "node --watch dist/main.js",
+        "build": "rollup -c",
+        "prepublishOnly": "npm run build"
     },
     "exports": {
         ".": {
@@ -14,18 +17,26 @@
             "require": "./dist/llv.cjs"
         }
     },
-    "author": "",
-    "license": "ISC",
-    "description": "",
+    "publishConfig": {
+        "access": "public"
+    },
+    "files": [
+        "dist",
+        "src",
+        "README.md"
+    ],
+    "author": "DonnieRich",
+    "license": "MIT",
+    "description": "A package for a Laravel-Like Validation structure on ExpressJS",
     "devDependencies": {
         "@rollup/plugin-node-resolve": "^16.0.0",
         "@rollup/plugin-typescript": "^12.1.2",
         "@types/node": "^22.10.5",
+        "tslib": "^2.8.1",
         "typescript": "^5.7.2",
         "vitest": "^2.1.8"
     },
     "dependencies": {
-        "regex-parser": "^2.3.0",
-        "tslib": "^2.8.1"
+        "regex-parser": "^2.3.0"
     }
 }
