@@ -72,4 +72,4 @@ class Validation implements IValidation {
     }
 }
 
-export = { Validation }
+export default Validation
