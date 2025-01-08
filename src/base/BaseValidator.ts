@@ -124,8 +124,9 @@ abstract class BaseValidator implements IValidator {
         if (typeof rule === 'string') {
 
             if (rule.match(/[a-z]+:.+/)) {
-                const [ruleKey, value] = this.validationSet.matchRule(rule);
+                const [ruleKey, rawValue] = this.validationSet.matchRule(rule);
                 const message = this.messages[`${key}.${ruleKey}`] ?? this.messages[ruleKey];
+                const value = this.validationSet.parseValue(rawValue);
                 result.rule = validations[ruleKey].getName();
                 result.callValidation = () => validations[ruleKey].validate(this.data, key, value);
                 result.callMessage = () => validations[ruleKey].message(field, message, value);
