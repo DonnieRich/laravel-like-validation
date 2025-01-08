@@ -5,6 +5,10 @@ abstract class BaseRule {
         return this.pascalCaseToSnakeCase(this.constructor.name)
     }
 
+    getError(): string {
+        return this.error
+    }
+
     abstract validate(data: { [s: string]: any }, field: string, value?: any): boolean;
     abstract message(field: string, message: string, value?: any): { name: string, message: string };
 

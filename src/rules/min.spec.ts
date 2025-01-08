@@ -123,7 +123,7 @@ describe("Min", () => {
         test("Should have a default error message", () => {
             const min = new Min();
 
-            const error = min.error;
+            const error = min.getError();
 
             expect(error).toBe("The {field} must have a min length of {value}");
         });

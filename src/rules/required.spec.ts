@@ -104,7 +104,7 @@ describe("Required", () => {
         test("Should have a default error message", () => {
             const required = new Required();
 
-            const error = required.error;
+            const error = required.getError();
 
             expect(error).toBe("The {field} field is required");
         });

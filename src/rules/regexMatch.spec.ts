@@ -101,7 +101,7 @@ describe("RegexMatch", () => {
         test("Should have a default error message", () => {
             const regexMatch = new RegexMatch();
 
-            const error = regexMatch.error;
+            const error = regexMatch.getError();
 
             expect(error).toBe("The {field} value must match the pattern {value}");
         });
