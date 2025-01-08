@@ -1,12 +1,12 @@
-import BaseRule from "./base/BaseRule.js";
-import type { IValidationSet } from "./contracts/IValidationSet.js";
-import type { IValidationRequest } from "./contracts/IValidationRequest.js"
-import ValidationSet from "./ValidationSet.js";
-import type { IRuleObject } from "./contracts/IRuleObject.js";
-import type { IParsedRule } from "./contracts/IParsedRule.js";
-import type { IValidator } from "./contracts/IValidator.js";
+import BaseRule from "./BaseRule.js";
+import type { IValidationSet } from "../contracts/IValidationSet.js";
+import type { IValidationRequest } from "../contracts/IValidationRequest.js"
+import ValidationSet from "../ValidationSet.js";
+import type { IRuleObject } from "../contracts/IRuleObject.js";
+import type { IParsedRule } from "../contracts/IParsedRule.js";
+import type { IValidator } from "../contracts/IValidator.js";
 
-abstract class Validator implements IValidator {
+abstract class BaseValidator implements IValidator {
     private validationSet: IValidationSet;
 
     private errors: {
@@ -247,4 +247,4 @@ abstract class Validator implements IValidator {
     }
 }
 
-export default Validator
+export default BaseValidator
