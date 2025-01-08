@@ -1,5 +1,5 @@
 abstract class BaseRule {
-    error: string = `Missing default error message for ${this.getName()} applied on {field}`;
+    protected error: string = `Missing default error message for ${this.getName()} applied on {field}`;
 
     getName(): string {
         return this.pascalCaseToSnakeCase(this.constructor.name)

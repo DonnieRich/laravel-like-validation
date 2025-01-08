@@ -1,7 +1,7 @@
 import BaseRule from "../base/BaseRule.js";
 
 class Min extends BaseRule {
-    error = "The {field} must have a min length of {value}"
+    protected error = "The {field} must have a min length of {value}"
 
     validate(data: { [s: string]: any }, field: string, value: string) {
 

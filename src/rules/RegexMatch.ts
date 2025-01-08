@@ -2,7 +2,7 @@ import RegexParser from "regex-parser";
 import BaseRule from "../base/BaseRule.js";
 
 class RegexMatch extends BaseRule {
-    error = "The {field} value must match the pattern {value}"
+    protected error = "The {field} value must match the pattern {value}"
 
     validate(data: { [s: string]: any }, field: string, value: string) {
         const regex = new RegExp(RegexParser(value));

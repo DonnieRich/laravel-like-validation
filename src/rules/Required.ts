@@ -1,7 +1,7 @@
 import BaseRule from "../base/BaseRule.js";
 
 class Required extends BaseRule {
-    error = 'The {field} field is required';
+    protected error = 'The {field} field is required';
 
     validate(data: { [s: string]: any }, field: string) {
 
