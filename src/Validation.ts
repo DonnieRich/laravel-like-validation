@@ -1,15 +1,15 @@
 import type { IValidation } from "./contracts/IValidation.js";
 import ValidationError from "./errors/ValidationError.js";
-import type Validator from "./Validator.js";
 import type { IValidationRequest } from "./contracts/IValidationRequest.js"
+import type { IValidator } from "./contracts/IValidator.js";
 
 
 class Validation implements IValidation {
 
-    private validator: Validator;
+    private validator: IValidator;
     private validationError: typeof ValidationError;
 
-    constructor(validator: Validator, validationError: typeof ValidationError = ValidationError) {
+    constructor(validator: IValidator, validationError: typeof ValidationError = ValidationError) {
         this.validator = validator;
         this.validationError = validationError;
     }
