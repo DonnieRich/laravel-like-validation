@@ -7,7 +7,7 @@ import type { IParsedRule } from "../contracts/IParsedRule.js";
 import type { IValidator } from "../contracts/IValidator.js";
 
 abstract class BaseValidator implements IValidator {
-    private validationSet: IValidationSet;
+    private validationSet!: IValidationSet;
 
     private errors: {
         body: { [k: string]: object },
@@ -42,12 +42,15 @@ abstract class BaseValidator implements IValidator {
 
     protected stopOnFirstError: boolean = false;
 
-    constructor(validationSet: IValidationSet) {
-        this.validationSet = validationSet ?? new ValidationSet();
-
+    constructor() {
+        this.applyValidationSet();
         this.rules = this.getRules();
         this.messages = this.getMessages();
         this.attributes = this.getAttributes();
+    }
+
+    protected applyValidationSet(): void {
+        this.validationSet = new ValidationSet();
     }
 
     public getRules(): IRuleObject {
@@ -66,7 +69,7 @@ abstract class BaseValidator implements IValidator {
         return {}
     }
 
-    private reset() {
+    private reset(): void {
         this.data = {};
         this.currentValidation = 'body';
     }

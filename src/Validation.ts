@@ -28,7 +28,7 @@ class Validation implements IValidation {
         return merged
     }
 
-    init() {
+    init(): Function {
 
         return (req: IValidationRequest, res: Response, next: Function) => {
 
