@@ -22,6 +22,10 @@ abstract class BaseRule {
     private pascalCaseToSnakeCase(name: string): string {
         return name.replace(/[A-Z]+/g, (m) => name.indexOf(m) === 0 ? m.toLowerCase() : `_${m.toLowerCase()}`)
     }
+
+    protected parseValue(value: string): string[] {
+        return value.split(',');
+    }
 }
 
 export default BaseRule

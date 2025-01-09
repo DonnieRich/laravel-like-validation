@@ -50,13 +50,6 @@ abstract class BaseValidationSet implements IValidationSet {
         return [match![1], match![2]];
     }
 
-    parseValue(value: string): string | string[] {
-        if (value.includes(',')) {
-            return value.split(',');
-        }
-
-        return value;
-    }
 }
 
 export default BaseValidationSet
