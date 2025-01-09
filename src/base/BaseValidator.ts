@@ -43,14 +43,13 @@ abstract class BaseValidator implements IValidator {
     protected stopOnFirstError: boolean = false;
 
     constructor() {
-        this.applyValidationSet();
         this.rules = this.getRules();
         this.messages = this.getMessages();
         this.attributes = this.getAttributes();
     }
 
-    protected applyValidationSet(): void {
-        this.validationSet = new ValidationSet();
+    public applyValidationSet(validationSet: IValidationSet): void {
+        this.validationSet = validationSet;
     }
 
     public getRules(): IRuleObject {

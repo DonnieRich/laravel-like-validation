@@ -7,10 +7,13 @@ import type { IValidator } from "./contracts/IValidator.js";
 class Validation implements IValidation {
 
     private validator: IValidator;
-    private validationError: typeof ValidationError;
+    private validationError!: typeof ValidationError;
 
-    constructor(validator: IValidator, validationError: typeof ValidationError = ValidationError) {
+    constructor(validator: IValidator) {
         this.validator = validator;
+    }
+
+    applyValidationError(validationError: typeof ValidationError): void {
         this.validationError = validationError;
     }
 
