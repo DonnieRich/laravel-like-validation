@@ -19,17 +19,17 @@ abstract class BaseValidator implements IValidator {
             query: {}
         };
 
-    protected rules: IRuleObject = {
+    protected customRules: IRuleObject = {
         body: {},
         params: {},
         query: {}
     };
 
-    protected messages: {
+    protected customMessages: {
         [k: string]: string
     } = {};
 
-    protected attributes: {
+    protected customAttributes: {
         [k: string]: string
     } = {};
 
@@ -43,16 +43,16 @@ abstract class BaseValidator implements IValidator {
     protected stopOnFirstError: boolean = false;
 
     constructor() {
-        this.rules = this.getRules();
-        this.messages = this.getMessages();
-        this.attributes = this.getAttributes();
+        this.customRules = this.rules();
+        this.customMessages = this.messages();
+        this.customAttributes = this.attributes();
     }
 
     public applyValidationSet(validationSet: IValidationSet): void {
         this.validationSet = validationSet;
     }
 
-    public getRules(): IRuleObject {
+    public rules(): IRuleObject {
         return {
             body: {},
             params: {},
@@ -60,11 +60,11 @@ abstract class BaseValidator implements IValidator {
         }
     }
 
-    public getMessages(): { [k: string]: string } {
+    public messages(): { [k: string]: string } {
         return {}
     }
 
-    public getAttributes(): { [k: string]: string } {
+    public attributes(): { [k: string]: string } {
         return {}
     }
 
@@ -113,7 +113,7 @@ abstract class BaseValidator implements IValidator {
     }
 
     private getRule(rule: string | Function | BaseRule | [BaseRule, any], key: string): IParsedRule {
-        const field = this.attributes[key] ?? key;
+        const field = this.customAttributes[key] ?? key;
 
         const result: IParsedRule = {
             rule: null,
@@ -127,12 +127,12 @@ abstract class BaseValidator implements IValidator {
 
             if (rule.match(/[a-z]+:.+/)) {
                 const [ruleKey, value] = this.validationSet.matchRule(rule);
-                const message = this.messages[`${key}.${ruleKey}`] ?? this.messages[ruleKey];
+                const message = this.customMessages[`${key}.${ruleKey}`] ?? this.customMessages[ruleKey];
                 result.rule = validations[ruleKey].getName();
                 result.callValidation = async () => await validations[ruleKey].validate(this.data, key, value);
                 result.callMessage = () => validations[ruleKey].message(field, message, value);
             } else if (validations[rule]) {
-                const message = this.messages[`${key}.${rule}`] ?? this.messages[rule];
+                const message = this.customMessages[`${key}.${rule}`] ?? this.customMessages[rule];
                 result.rule = validations[rule].getName();
                 result.callValidation = async () => await validations[rule].validate(this.data, key);
                 result.callMessage = () => validations[rule].message(field, message);
@@ -140,7 +140,7 @@ abstract class BaseValidator implements IValidator {
         }
 
         if (rule instanceof BaseRule) {
-            const message = this.messages[`${key}.${rule.getName()}`] ?? this.messages[rule.getName()];
+            const message = this.customMessages[`${key}.${rule.getName()}`] ?? this.customMessages[rule.getName()];
             result.rule = rule.getName();
             result.callValidation = async () => await rule.validate(this.data, key);
             result.callMessage = () => rule.message(field, message);
@@ -153,7 +153,7 @@ abstract class BaseValidator implements IValidator {
         if (Array.isArray(rule)) {
             if (rule[0] instanceof BaseRule) {
                 const values = rule.slice(1);
-                const message = this.messages[`${key}.${rule[0].getName()}`] ?? this.messages[rule[0].getName()];
+                const message = this.customMessages[`${key}.${rule[0].getName()}`] ?? this.customMessages[rule[0].getName()];
                 result.rule = rule[0].getName();
                 result.callValidation = async () => await rule[0].validate(this.data, key, values);
                 result.callMessage = () => rule[0].message(field, message, values);
@@ -172,7 +172,7 @@ abstract class BaseValidator implements IValidator {
         this.data = data;
 
         let prevKey = '';
-        for (const key in this.rules[this.currentValidation]) {
+        for (const key in this.customRules[this.currentValidation]) {
 
             if (key !== prevKey) {
                 this.bail = false
@@ -180,10 +180,10 @@ abstract class BaseValidator implements IValidator {
 
             const rules = [];
 
-            if (typeof this.rules[this.currentValidation][key] === 'string') {
-                rules.push(...(this.rules[this.currentValidation][key] as string).split('|'))
-            } else if (Array.isArray(this.rules[this.currentValidation][key])) {
-                rules.push(...this.rules[this.currentValidation][key])
+            if (typeof this.customRules[this.currentValidation][key] === 'string') {
+                rules.push(...(this.customRules[this.currentValidation][key] as string).split('|'))
+            } else if (Array.isArray(this.customRules[this.currentValidation][key])) {
+                rules.push(...this.customRules[this.currentValidation][key])
             }
 
             const promises = rules.map(async rule => {
@@ -218,21 +218,21 @@ abstract class BaseValidator implements IValidator {
     }
 
     private async validateBody(data: object | undefined): Promise<void> {
-        if (this.rules.body && data) {
+        if (this.customRules.body && data) {
             this.currentValidation = 'body';
             await this.applyValidation(data);
         }
     }
 
     private async validateParams(data: object | undefined): Promise<void> {
-        if (this.rules.params && data) {
+        if (this.customRules.params && data) {
             this.currentValidation = 'params';
             await this.applyValidation(data);
         }
     }
 
     private async validateQuery(data: object | undefined): Promise<void> {
-        if (this.rules.query && data) {
+        if (this.customRules.query && data) {
             this.currentValidation = 'query';
             await this.applyValidation(data);
         }

@@ -5,9 +5,9 @@ import type { IValidationSet } from "./IValidationSet.js";
 
 export interface IValidator {
 
-    getRules(): IRuleObject;
-    getMessages(): { [k: string]: string };
-    getAttributes(): { [k: string]: string };
+    rules(): IRuleObject;
+    messages(): { [k: string]: string };
+    attributes(): { [k: string]: string };
     applyValidationSet(validationSet: IValidationSet): void;
     validate(req: IValidationRequest, fail: (error: object, exit: boolean) => void): Promise<void>;
 }
