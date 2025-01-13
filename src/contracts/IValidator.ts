@@ -9,5 +9,5 @@ export interface IValidator {
     getMessages(): { [k: string]: string };
     getAttributes(): { [k: string]: string };
     applyValidationSet(validationSet: IValidationSet): void;
-    validate(req: IValidationRequest, fail: (error: object, exit: boolean) => void): void;
+    validate(req: IValidationRequest, fail: (error: object, exit: boolean) => void): Promise<void>;
 }

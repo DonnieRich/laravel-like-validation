@@ -37,6 +37,7 @@
         "vitest": "^2.1.8"
     },
     "dependencies": {
+        "@types/express": "^5.0.0",
         "regex-parser": "^2.3.0"
     }
 }

@@ -1,5 +1,5 @@
 export interface IParsedRule {
     rule: string | null
-    callValidation: () => boolean
+    callValidation: () => Promise<boolean>
     callMessage: (() => { name: string, message: string }) | null
 }

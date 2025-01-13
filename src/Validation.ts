@@ -1,8 +1,9 @@
+/// <reference types="express" />
 import type { IValidation } from "./contracts/IValidation.js";
 import ValidationError from "./errors/ValidationError.js";
 import type { IValidationRequest } from "./contracts/IValidationRequest.js"
 import type { IValidator } from "./contracts/IValidator.js";
-
+import type { Request, Response } from "express";
 
 class Validation implements IValidation {
 
@@ -31,47 +32,81 @@ class Validation implements IValidation {
         return merged
     }
 
-    init(): Function {
+    private async validationMiddleware(req: IValidationRequest, res: Response, next: Function): Promise<void> {
 
-        return (req: IValidationRequest, res: Response, next: Function) => {
+        let result: { status: number, errors: object } = {
+            status: 422,
+            errors: {}
+        };
 
-            let result: { status: number, errors: object } = {
-                status: 422,
-                errors: {}
-            };
+        try {
 
-            try {
+            await this.validator.validate(req, (error: { status?: number }, exit = false) => {
 
-                this.validator.validate(req, (error: { status?: number }, exit = false) => {
+                result.status = error.status ?? 422;
 
-                    result.status = error.status ?? 422;
-
-                    if (exit) {
-                        throw new this.validationError(error);
-                    } else {
-                        result.errors = this.mergeErrors(error, result.errors)
-                    }
-
-                });
-
-                if (Object.keys(result.errors).length > 0) {
-                    throw new this.validationError(result.errors);
-                }
-
-                next();
-
-            } catch (error: Error | ValidationError | any) {
-                if (error.prototype instanceof ValidationError || error instanceof ValidationError) {
-                    next(error)
+                if (exit) {
+                    throw new this.validationError(error);
                 } else {
-                    next({ status: 500, errors: error.message })
+                    result.errors = this.mergeErrors(error, result.errors)
                 }
 
+            })
+
+            if (Object.keys(result.errors).length > 0) {
+                throw new this.validationError(result.errors);
             }
 
+            next();
 
+        } catch (error: Error | ValidationError | any) {
+            if (error.prototype instanceof ValidationError || error instanceof ValidationError) {
+                next(error)
+            } else {
+                next({ status: 500, errors: error.message })
+            }
         }
+    }
 
+    init(): Function {
+
+        return this.validationMiddleware.bind(this)
+
+        // return async (req: IValidationRequest, res: Response, next: Function) => {
+
+        //     let result: { status: number, errors: object } = {
+        //         status: 422,
+        //         errors: {}
+        //     };
+
+        //     try {
+
+        //         await this.validator.validate(req, (error: { status?: number }, exit = false) => {
+
+        //             result.status = error.status ?? 422;
+
+        //             if (exit) {
+        //                 throw new this.validationError(error);
+        //             } else {
+        //                 result.errors = this.mergeErrors(error, result.errors)
+        //             }
+
+        //         })
+
+        //         if (Object.keys(result.errors).length > 0) {
+        //             throw new this.validationError(result.errors);
+        //         }
+
+        //         next();
+
+        //     } catch (error: Error | ValidationError | any) {
+        //         if (error.prototype instanceof ValidationError || error instanceof ValidationError) {
+        //             next(error)
+        //         } else {
+        //             next({ status: 500, errors: error.message })
+        //         }
+        //     }
+        // }
     }
 }
 

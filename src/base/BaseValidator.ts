@@ -117,7 +117,7 @@ abstract class BaseValidator implements IValidator {
 
         const result: IParsedRule = {
             rule: null,
-            callValidation: () => false,
+            callValidation: async () => false,
             callMessage: null
         }
 
@@ -129,12 +129,12 @@ abstract class BaseValidator implements IValidator {
                 const [ruleKey, value] = this.validationSet.matchRule(rule);
                 const message = this.messages[`${key}.${ruleKey}`] ?? this.messages[ruleKey];
                 result.rule = validations[ruleKey].getName();
-                result.callValidation = () => validations[ruleKey].validate(this.data, key, value);
+                result.callValidation = async () => await validations[ruleKey].validate(this.data, key, value);
                 result.callMessage = () => validations[ruleKey].message(field, message, value);
             } else if (validations[rule]) {
                 const message = this.messages[`${key}.${rule}`] ?? this.messages[rule];
                 result.rule = validations[rule].getName();
-                result.callValidation = () => validations[rule].validate(this.data, key);
+                result.callValidation = async () => await validations[rule].validate(this.data, key);
                 result.callMessage = () => validations[rule].message(field, message);
             }
         }
@@ -142,11 +142,11 @@ abstract class BaseValidator implements IValidator {
         if (rule instanceof BaseRule) {
             const message = this.messages[`${key}.${rule.getName()}`] ?? this.messages[rule.getName()];
             result.rule = rule.getName();
-            result.callValidation = () => rule.validate(this.data, key);
+            result.callValidation = async () => await rule.validate(this.data, key);
             result.callMessage = () => rule.message(field, message);
         } else if (typeof rule === 'function') {
             result.rule = typeof rule;
-            result.callValidation = () => rule(this.data, key, this.fail);
+            result.callValidation = async () => await rule(this.data, { key, current: this.currentValidation }, this.fail);
             result.callMessage = null;
         }
 
@@ -155,7 +155,7 @@ abstract class BaseValidator implements IValidator {
                 const values = rule.slice(1);
                 const message = this.messages[`${key}.${rule[0].getName()}`] ?? this.messages[rule[0].getName()];
                 result.rule = rule[0].getName();
-                result.callValidation = () => rule[0].validate(this.data, key, values);
+                result.callValidation = async () => await rule[0].validate(this.data, key, values);
                 result.callMessage = () => rule[0].message(field, message, values);
             }
         }
@@ -167,7 +167,7 @@ abstract class BaseValidator implements IValidator {
         return result;
     }
 
-    private applyValidation(data: object): void {
+    private async applyValidation(data: object): Promise<void> {
         this.errors[this.currentValidation] = {};
         this.data = data;
 
@@ -186,8 +186,7 @@ abstract class BaseValidator implements IValidator {
                 rules.push(...this.rules[this.currentValidation][key])
             }
 
-            rules.forEach(rule => {
-
+            const promises = rules.map(async rule => {
                 if (typeof rule === 'string' && rule === 'bail') {
                     this.bail = true
                     return
@@ -195,7 +194,8 @@ abstract class BaseValidator implements IValidator {
 
                 const v = this.getRule(rule, key);
 
-                if (!v.callValidation()) {
+                const validationResult = await v.callValidation();
+                if (!validationResult) {
 
                     if (v.callMessage) {
                         const error = v.callMessage();
@@ -208,40 +208,44 @@ abstract class BaseValidator implements IValidator {
                     }
 
                 }
+
+                return validationResult;
             })
 
+            await Promise.all(promises);
+
         }
     }
 
-    private validateBody(data: object | undefined): void {
+    private async validateBody(data: object | undefined): Promise<void> {
         if (this.rules.body && data) {
             this.currentValidation = 'body';
-            this.applyValidation(data);
+            await this.applyValidation(data);
         }
     }
 
-    private validateParams(data: object | undefined): void {
+    private async validateParams(data: object | undefined): Promise<void> {
         if (this.rules.params && data) {
             this.currentValidation = 'params';
-            this.applyValidation(data);
+            await this.applyValidation(data);
         }
     }
 
-    private validateQuery(data: object | undefined): void {
+    private async validateQuery(data: object | undefined): Promise<void> {
         if (this.rules.query && data) {
             this.currentValidation = 'query';
-            this.applyValidation(data);
+            await this.applyValidation(data);
         }
     }
 
-    public validate(req: IValidationRequest, fail: (error: object, exit: boolean) => void): void {
+    public async validate(req: IValidationRequest, fail: (error: object, exit: boolean) => void): Promise<void> {
         this.fail = fail;
 
         this.beforeValidate();
 
-        this.validateBody(req.body);
-        this.validateParams(req.params);
-        this.validateQuery(req.query);
+        await this.validateBody(req.body);
+        await this.validateParams(req.params);
+        await this.validateQuery(req.query);
 
         this.afterValidate();
 
