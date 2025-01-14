@@ -3,7 +3,7 @@ import BaseRule from "../base/BaseRule.js";
 class PresentIf extends BaseRule {
     error = "The {field} field must be present if the field {anotherField} has a value of {anotherValue}"
 
-    validate(data: { [s: string]: any }, field: string, value: Array<string>): boolean {
+    async validate(data: { [s: string]: any }, field: string, value: Array<string>): Promise<boolean> {
         const [anotherField, anotherValue] = value;
 
         return (
@@ -13,7 +13,7 @@ class PresentIf extends BaseRule {
         );
     }
 
-    message(field: string, message: string = '', value: Array<string>) {
+    message(field: string, message: string = '', value: Array<string>): { name: string, message: string } {
         const [anotherField, anotherValue] = value;
         return {
             name: this.getName(),
