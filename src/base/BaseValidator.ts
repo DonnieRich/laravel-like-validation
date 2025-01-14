@@ -167,16 +167,59 @@ abstract class BaseValidator implements IValidator {
         return result;
     }
 
+    private mapRulesToPromises(rules: (string | Function | BaseRule | [BaseRule, any])[], key: string): Promise<boolean>[] {
+
+        let bail = false;
+        let lastValidationFailed = false;
+
+        const promises = rules.map(async rule => {
+            if (typeof rule === 'string' && rule === 'bail') {
+                bail = true
+                return true;
+            }
+
+            if (bail && lastValidationFailed) {
+                console.log('bailing')
+                return true;
+            }
+
+            const v = this.getRule(rule, key);
+            const validationResult = await v.callValidation();
+
+            if (!validationResult) {
+
+                lastValidationFailed = true;
+
+                if (v.callMessage) {
+                    const error = v.callMessage();
+
+                    this.addError(key, error);
+
+                    if (this.stopOnFirstError) {
+                        this.fail({ [this.currentValidation]: { [key]: error } }, true)
+                    }
+                }
+
+            }
+
+            return validationResult;
+        })
+
+        return promises;
+    }
+
     private async applyValidation(data: object): Promise<void> {
         this.errors[this.currentValidation] = {};
         this.data = data;
 
         let prevKey = '';
+        const promises: Promise<boolean>[] = [];
+
         for (const key in this.customRules[this.currentValidation]) {
 
-            if (key !== prevKey) {
-                this.bail = false
-            }
+            // if (key !== prevKey) {
+            //     this.bail = false
+            // }
 
             const rules = [];
 
@@ -186,35 +229,15 @@ abstract class BaseValidator implements IValidator {
                 rules.push(...this.customRules[this.currentValidation][key])
             }
 
-            const promises = rules.map(async rule => {
-                if (typeof rule === 'string' && rule === 'bail') {
-                    this.bail = true
-                    return
-                }
-
-                const v = this.getRule(rule, key);
-
-                const validationResult = await v.callValidation();
-                if (!validationResult) {
-
-                    if (v.callMessage) {
-                        const error = v.callMessage();
-
-                        this.addError(key, error);
-
-                        if (this.bail || this.stopOnFirstError) {
-                            this.fail({ [this.currentValidation]: { [key]: error } }, true)
-                        }
-                    }
-
-                }
-
-                return validationResult;
-            })
-
-            await Promise.all(promises);
-
+            promises.push(...this.mapRulesToPromises(rules, key));
         }
+
+        if (this.stopOnFirstError) {
+            await Promise.race(promises);
+        } else {
+            await Promise.all(promises);
+        }
+
     }
 
     private async validateBody(data: object | undefined): Promise<void> {
