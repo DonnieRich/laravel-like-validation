@@ -1,15 +1,26 @@
 import BaseRule from "./BaseRule.js";
 import type { IValidationSet } from "../contracts/IValidationSet.js";
 import type { IValidationRequest } from "../contracts/IValidationRequest.js"
-import ValidationSet from "../ValidationSet.js";
 import type { IRuleObject } from "../contracts/IRuleObject.js";
 import type { IParsedRule } from "../contracts/IParsedRule.js";
 import type { IValidator } from "../contracts/IValidator.js";
+import type { Result } from "../types/Result.js";
+
 
 abstract class BaseValidator implements IValidator {
     private validationSet!: IValidationSet;
 
     private errors: {
+        body: { [k: string]: object },
+        params: { [k: string]: object },
+        query: { [k: string]: object }
+    } = {
+            body: {},
+            params: {},
+            query: {}
+        };
+
+    private validated: {
         body: { [k: string]: object },
         params: { [k: string]: object },
         query: { [k: string]: object }
@@ -33,12 +44,11 @@ abstract class BaseValidator implements IValidator {
         [k: string]: string
     } = {};
 
-    protected fail: (error: object, exit: boolean) => void = (error, exit = false) => { return };
+    protected fail: (error: object, validated: object) => void = (error, validated) => { return };
 
     private data: {} = {};
 
     private currentValidation: keyof typeof this.errors = 'body';
-    private bail: boolean = false;
 
     protected stopOnFirstError: boolean = false;
 
@@ -86,7 +96,7 @@ abstract class BaseValidator implements IValidator {
         this.reset();
     }
 
-    private generateValidationErrors(): object {
+    private getValidationErrors(): object {
         const errors: {
             body?: {},
             params?: {},
@@ -108,8 +118,34 @@ abstract class BaseValidator implements IValidator {
         return errors;
     }
 
+    private getValidatedData(): object {
+        const validated: {
+            body?: {},
+            params?: {},
+            query?: {}
+        } = {};
+
+        if (Object.keys(this.validated.body).length > 0) {
+            validated.body = { ...this.validated.body }
+        }
+
+        if (Object.keys(this.validated.params).length > 0) {
+            validated.params = { ...this.validated.params }
+        }
+
+        if (Object.keys(this.validated.query).length > 0) {
+            validated.query = { ...this.validated.query }
+        }
+
+        return validated;
+    }
+
     private addError(key: string, error: { name: string, message: string }): void {
         this.errors[this.currentValidation][key] = { [error.name]: error.message, ...this.errors[this.currentValidation][key] };
+    }
+
+    private addValidData(key: string, error: { name: string, message: string }): void {
+        this.validated[this.currentValidation][key] = { [error.name]: error.message, ...this.validated[this.currentValidation][key] };
     }
 
     private getRule(rule: string | Function | BaseRule | [BaseRule, any], key: string): IParsedRule {
@@ -167,42 +203,34 @@ abstract class BaseValidator implements IValidator {
         return result;
     }
 
-    private mapRulesToPromises(rules: (string | Function | BaseRule | [BaseRule, any])[], key: string): Promise<boolean>[] {
+    private mapRulesToPromises(rules: (string | Function | BaseRule | [BaseRule, any])[], key: string): Promise<object>[] {
 
-        let bail = false;
         let lastValidationFailed = false;
 
         const promises = rules.map(async rule => {
-            if (typeof rule === 'string' && rule === 'bail') {
-                bail = true
-                return true;
-            }
 
-            if (bail && lastValidationFailed) {
-                console.log('bailing')
-                return true;
-            }
 
             const v = this.getRule(rule, key);
-            const validationResult = await v.callValidation();
 
-            if (!validationResult) {
 
-                lastValidationFailed = true;
+            return await new Promise<object>(async (resolve, reject) => {
 
-                if (v.callMessage) {
-                    const error = v.callMessage();
+                const validationResult = await v.callValidation();
 
-                    this.addError(key, error);
+                if (!validationResult) {
 
-                    if (this.stopOnFirstError) {
-                        this.fail({ [this.currentValidation]: { [key]: error } }, true)
+                    lastValidationFailed = true;
+
+                    if (v.callMessage) {
+                        const error = v.callMessage();
+
+                        reject({ [this.currentValidation]: { [key]: error } });
                     }
                 }
 
-            }
+                resolve({ [this.currentValidation]: { [key]: this.data[key as keyof typeof this.data] } });
+            });
 
-            return validationResult;
         })
 
         return promises;
@@ -212,14 +240,9 @@ abstract class BaseValidator implements IValidator {
         this.errors[this.currentValidation] = {};
         this.data = data;
 
-        let prevKey = '';
-        const promises: Promise<boolean>[] = [];
+        const promises: Promise<object>[] = [];
 
         for (const key in this.customRules[this.currentValidation]) {
-
-            // if (key !== prevKey) {
-            //     this.bail = false
-            // }
 
             const rules = [];
 
@@ -232,12 +255,68 @@ abstract class BaseValidator implements IValidator {
             promises.push(...this.mapRulesToPromises(rules, key));
         }
 
+        let method: 'allSettled' | 'all' = 'allSettled';
         if (this.stopOnFirstError) {
-            await Promise.race(promises);
-        } else {
-            await Promise.all(promises);
+            method = 'all';
         }
 
+        await this.handlePromises(method, promises);
+
+
+    }
+
+    private async handlePromises(method: 'allSettled' | 'all', promises: Promise<object>[]): Promise<void> {
+
+        try {
+
+            const results = await Promise[method].call(Promise, promises);
+
+
+            if (Array.isArray(results)) {
+
+                const [resolved, rejected] = (results as Result[]).reduce<[Result[], Result[]]>((acc, result) => {
+
+                    if (result.status === 'fulfilled') {
+                        acc[0].push(result);
+                    } else {
+                        acc[1].push(result);
+                    }
+
+                    return acc;
+
+                }, [[], []]);
+
+                this.handleErrors(rejected);
+                this.handleValidData(resolved);
+
+            } else {
+                throw new Error("Invalid promises array");
+            }
+        } catch (error: any) {
+            for (const key in error[this.currentValidation]) {
+                this.addError(key, error[this.currentValidation][key]);
+            }
+        }
+    }
+
+    private handleErrors(errors: Result[]): void {
+        for (let i = 0; i < errors.length; i++) {
+            const { reason: { [this.currentValidation]: currentValidation } } = errors[i];
+
+            for (const key in currentValidation) {
+                this.addError(key, currentValidation[key]);
+            }
+        }
+    }
+
+    private handleValidData(valid: Result[]): void {
+        for (let i = 0; i < valid.length; i++) {
+            const { value: { [this.currentValidation]: currentValidation } } = valid[i];
+
+            for (const key in currentValidation) {
+                this.addValidData(key, currentValidation[key]);
+            }
+        }
     }
 
     private async validateBody(data: object | undefined): Promise<void> {
@@ -261,7 +340,7 @@ abstract class BaseValidator implements IValidator {
         }
     }
 
-    public async validate(req: IValidationRequest, fail: (error: object, exit: boolean) => void): Promise<void> {
+    public async validate(req: IValidationRequest, fail: (error: object, validated: object) => void): Promise<void> {
         this.fail = fail;
 
         this.beforeValidate();
@@ -272,7 +351,7 @@ abstract class BaseValidator implements IValidator {
 
         this.afterValidate();
 
-        this.fail(this.generateValidationErrors(), false);
+        this.fail(this.getValidationErrors(), this.getValidatedData());
     }
 }
 

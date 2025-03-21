@@ -20,14 +20,14 @@ class ValidationFactory extends BaseValidationFactory {
         return validationSet;
     }
 
-    make(validator: IValidator): Function {
+    make(validator: IValidator, throwOnError: boolean = true): Function {
 
         const validationSet = this.getValidationSet();
         validator.applyValidationSet(validationSet);
 
         let validationError = this.getValidationError();
 
-        const validation = new Validation(validator);
+        const validation = new Validation(validator, throwOnError);
         validation.applyValidationError(validationError);
 
         return validation.init();

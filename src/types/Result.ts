@@ -1,0 +1,1 @@
+export type Result = { status: 'fulfilled' | 'rejected', [key: string]: any };

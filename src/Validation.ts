@@ -1,7 +1,6 @@
 /// <reference types="express" />
 import type { IValidation } from "./contracts/IValidation.js";
 import ValidationError from "./errors/ValidationError.js";
-import type { IValidationRequest } from "./contracts/IValidationRequest.js"
 import type { IValidator } from "./contracts/IValidator.js";
 import type { Request, Response } from "express";
 
@@ -9,9 +8,11 @@ class Validation implements IValidation {
 
     private validator: IValidator;
     private validationError!: typeof ValidationError;
+    private throwOnError: boolean;
 
-    constructor(validator: IValidator) {
+    constructor(validator: IValidator, throwOnError: boolean) {
         this.validator = validator;
+        this.throwOnError = throwOnError;
     }
 
     applyValidationError(validationError: typeof ValidationError): void {
@@ -32,30 +33,42 @@ class Validation implements IValidation {
         return merged
     }
 
-    private async validationMiddleware(req: IValidationRequest, res: Response, next: Function): Promise<void> {
+    private mergeValidated(validated: object, start: object): object {
+        const merged: { [key: string]: object } = { ...start }
 
-        let result: { status: number, errors: object } = {
+        for (const key in validated) {
+            if (typeof validated[key as keyof typeof validated] === 'object') {
+                merged[key] = { ...this.mergeValidated(validated[key as keyof typeof validated], merged[key]) }
+            } else {
+                merged[key] = validated[key as keyof typeof validated]
+            }
+
+        }
+        return merged
+    }
+
+    private async validationMiddleware(req: Request, res: Response, next: Function): Promise<void> {
+
+        let result: { status: number, errors: object, validated: object } = {
             status: 422,
-            errors: {}
+            errors: {},
+            validated: {}
         };
 
         try {
 
-            await this.validator.validate(req, (error: { status?: number }, exit = false) => {
+            await this.validator.validate(req, (error: object, validated: object) => {
 
-                result.status = error.status ?? 422;
-
-                if (exit) {
-                    throw new this.validationError(error);
-                } else {
-                    result.errors = this.mergeErrors(error, result.errors)
-                }
+                result.errors = this.mergeErrors(error, result.errors);
+                result.validated = this.mergeValidated(validated, result.validated)
 
             })
 
-            if (Object.keys(result.errors).length > 0) {
+            if (Object.keys(result.errors).length > 0 && this.throwOnError) {
                 throw new this.validationError(result.errors);
             }
+
+            req.locals = { result };
 
             next();
 
@@ -72,41 +85,6 @@ class Validation implements IValidation {
 
         return this.validationMiddleware.bind(this)
 
-        // return async (req: IValidationRequest, res: Response, next: Function) => {
-
-        //     let result: { status: number, errors: object } = {
-        //         status: 422,
-        //         errors: {}
-        //     };
-
-        //     try {
-
-        //         await this.validator.validate(req, (error: { status?: number }, exit = false) => {
-
-        //             result.status = error.status ?? 422;
-
-        //             if (exit) {
-        //                 throw new this.validationError(error);
-        //             } else {
-        //                 result.errors = this.mergeErrors(error, result.errors)
-        //             }
-
-        //         })
-
-        //         if (Object.keys(result.errors).length > 0) {
-        //             throw new this.validationError(result.errors);
-        //         }
-
-        //         next();
-
-        //     } catch (error: Error | ValidationError | any) {
-        //         if (error.prototype instanceof ValidationError || error instanceof ValidationError) {
-        //             next(error)
-        //         } else {
-        //             next({ status: 500, errors: error.message })
-        //         }
-        //     }
-        // }
     }
 }
 
