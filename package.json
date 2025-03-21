@@ -1,8 +1,8 @@
 {
     "name": "@ricciodev/laravel-like-validation",
     "version": "0.1.0-alpha",
-    "main": "./dist/llv.cjs",
-    "module": "./dist/llv.js",
+    "main": "./dist/index.cjs",
+    "module": "./dist/index.js",
     "type": "module",
     "scripts": {
         "test": "vitest",
@@ -13,8 +13,8 @@
     },
     "exports": {
         ".": {
-            "import": "./dist/llv.js",
-            "require": "./dist/llv.cjs"
+            "import": "./dist/index.js",
+            "require": "./dist/index.cjs"
         }
     },
     "publishConfig": {

@@ -1,191 +1,108 @@
-# Laravel-Like Validation for ExpressJS
+# @ricciodev/laravel-like-validation
 
 A package for a Laravel-Like Validation structure on ExpressJS.
 
+## Table of Contents
+
+- [Installation](#installation)
+- [Importing](#importing)
+- [Basic Usage](#basic-usage)
+    - [Creating a Validation Class](#creating-a-validation-class)
+    - [Using Validation Rules](#using-validation-rules)
+    - [Creating Middleware](#creating-middleware)
+    - [Applying Middleware in ExpressJS](#applying-middleware-in-expressjs)
+
 ## Installation
+
+### npm
 
 ```sh
 npm install @ricciodev/laravel-like-validation
 ```
 
-## Usage
+### yarn
 
-### Importing the Package
-
-#### ESM
-```typescript
-import { Validation, ValidationSet, BaseValidator, BaseRule, BaseValidationSet, ValidationFactory } from '@ricciodev/laravel-like-validation';
+```sh
+yarn add @ricciodev/laravel-like-validation
 ```
 
-#### CommonJS
+## Importing
+
+### ESM
+
 ```js
-const { Validation, ValidationSet, BaseValidator, BaseRule, BaseValidationSet, ValidationFactory } = require('@ricciodev/laravel-like-validation');
+import { ValidationFactory, BaseValidator } from '@ricciodev/laravel-like-validation';
 ```
 
-### Using ValidationFactory to Create Middleware
+### CJS
 
-You can use the `ValidationFactory` to create middleware for ExpressJS.
+```js
+const { ValidationFactory, BaseValidator } = require('@ricciodev/laravel-like-validation');
+```
 
-#### Example
+## Basic Usage
 
-First, create a custom validator by extending the `BaseValidator` class. Please note the validation rules are separated by a pipe ```|```.
-An array sintax is also available and recommended for advanced use.
+### Creating a Validation Class
 
-```typescript
-// filepath: /c:/typescript/laravel-like-validation/src/CustomValidator.ts
+Create a new file `ArticlePostRequestValidation.ts`:
+
+```ts
 import BaseValidator from '@ricciodev/laravel-like-validation';
 
-class CustomValidator extends BaseValidator {
-    getRules() {
-        return {
-            body: {
-                fieldName: 'required|min:3'
-            }
-        };
-    }
+class ArticlePostRequestValidation extends BaseValidator {
+        rules() {
+                return {
+                        body: {
+                                title: 'required|max:255',
+                                content: 'required'
+                        }
+                };
+        }
 
-    getMessages() {
-        return {
-            'fieldName.required': 'The fieldName is required.',
-            'fieldName.min': 'The fieldName must be at least 3 characters long.'
-        };
-    }
-
-    getAttributes() {
-        return {
-            fieldName: 'Field Name'
-        };
-    }
+        messages() {
+                return {
+                        'title.required': 'The title field is required.',
+                        'title.max': 'The title may not be greater than 255 characters.',
+                        'content.required': 'The content field is required.'
+                };
+        }
 }
 
-export default CustomValidator;
+export default ArticlePostRequestValidation;
 ```
 
-Next, use the ValidationFactory to create middleware:
+### Creating Middleware
 
-```typescript
-// MiddlewareValidationMaker.js
+Create a new file `validationMiddleware.ts`:
+
+```ts
 import { ValidationFactory } from '@ricciodev/laravel-like-validation';
-import CustomValidator from './CustomValidator';
+import ArticlePostRequestValidation from './ArticlePostRequestValidation';
 
 const factory = new ValidationFactory();
+const validator = new ArticlePostRequestValidation();
 
-export default {
-    customValidator: factory.make(CustomValidator),
-}
+export const validationMiddleware = factory.make(validator);
 ```
 
-Finally apply the middleware on your route:
+### Applying Middleware in ExpressJS
 
-```typescript
+In your ExpressJS route file, apply the middleware:
+
+```js
 import express from 'express';
-import { customValidator } from './MiddlewareValidationMaker';
+import { validationMiddleware } from './validationMiddleware';
 
 const app = express();
-
 app.use(express.json());
 
-app.post('/endpoint', customValidator, (req, res) => {
-    res.send('Validation passed!');
+app.post('/articles', validationMiddleware, (req, res) => {
+        res.send('Article is valid!');
 });
 
 app.listen(3000, () => {
-    console.log('Server is running on port 3000');
+        console.log('Server is running on port 3000');
 });
 ```
 
-### Creating Custom Rules
-You can apply your custom rules directly in the getRules method by defining a callback or by instantiating a custom rule extending the BaseRule abstract class.
-
-#### Example
-Example of a Validator Using a Callback as a Validation Rule. Please note the array syntax for the validation rules.
-
-```js
-class CustomRequestValidation extends BaseValidator {
-
-    getRules() {
-        return {
-            body: {
-                tags: ['required', 'is_array', (data, key, fail) => {
-
-                    if (Array.isArray(data[key])) {
-
-                        const emptyTag = data[key].some(tag => tag.trim() === '');
-
-                        if (emptyTag) {
-
-                            fail({
-                                body: {
-                                    [key]: {
-                                        'empty-items': 'Tags cannot have empty items'
-                                    }
-                                }
-                            })
-
-                        }
-                    }
-
-                }]
-            }
-        }
-    }
-
-}
-```
-
-Please note the callback accept three arguments: the data under validation, the key corresponding to the field under validation and a fail callback that will pass the validation error to the correct method.
-
-Also note the fail argument must be an object and the first property should be the relative element under validation (body, params or query).
-Inside this object there is the property corresponding to the current field under validation (in this example is tags).
-Here we can add the custom error for this validation: a property that will be the name of the error and a value corresponding to the message showed to the user.
-
-
-You can create custom validation rules by extending the BaseRule class:
-
-```typescript
-import { BaseRule } from '@ricciodev/laravel-like-validation';
-
-class CustomRule extends BaseRule {
-    error = 'Custom error message';
-
-    validate(data: { [s: string]: any }, field: string, value?: any): boolean {
-        // Custom validation logic
-        return true;
-    }
-
-    message(field: string, message: string = '', value?: any) {
-        return {
-            name: this.getName(),
-            message: this.generateMessage({ field, value }, message)
-        };
-    }
-}
-
-export default CustomRule;
-```
-
-Then add this rule to the CustomValidation. Please note the array syntax for the validation rules.
-
-```typescript
-import BaseValidator from '@ricciodev/laravel-like-validation';
-import CustomRule from './CustomRule';
-
-class CustomRequestValidation extends BaseValidator {
-
-    getRules() {
-        return {
-            body: {
-                tags: ['required', 'is_array', new CustomRule()]
-            }
-        }
-    }
-
-}
-```
-
-### Add Custom Rules to the Validation Set
-
-If a custom rule will be used on many validators is possible to add it directly in the Validation Set with all the other rules already availables.
-
-## License
-This project is licensed under the MIT License
+That's it! You now have a basic setup for using Laravel-like validation in your ExpressJS application.

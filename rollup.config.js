@@ -5,12 +5,12 @@ export default {
     input: './src/main.ts',
     output: [
         {
-            file: 'dist/llv.cjs',
+            file: 'dist/index.cjs',
             sourcemap: true,
             format: 'cjs'
         },
         {
-            file: 'dist/llv.js',
+            file: 'dist/index.js',
             sourcemap: true,
             format: 'es'
         }
