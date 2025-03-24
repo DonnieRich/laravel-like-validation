@@ -1,0 +1,1 @@
+export type ValidationKeys = Partial<Record<'body' | 'params' | 'query', any>>;

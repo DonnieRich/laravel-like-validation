@@ -3,17 +3,19 @@ import type { IValidationSet } from "../contracts/IValidationSet.js";
 import type { IValidationRequest } from "../contracts/IValidationRequest.js"
 import type { IRuleObject } from "../contracts/IRuleObject.js";
 import type { IParsedRule } from "../contracts/IParsedRule.js";
-import type { IValidator } from "../contracts/IValidator.js";
 import type { Result } from "../types/Result.js";
+import type BaseValidation from "./BaseValidation.js";
+import type { ValidationKeys } from "../types/ValidationKeys.js";
 
 
-abstract class BaseValidator implements IValidator {
-    private validationSet!: IValidationSet;
+abstract class BaseValidator {
+    protected validationSet!: IValidationSet;
+    protected validation!: BaseValidation;
 
     private errors: {
-        body: { [k: string]: object },
-        params: { [k: string]: object },
-        query: { [k: string]: object }
+        body?: {},
+        params?: {},
+        query?: {}
     } = {
             body: {},
             params: {},
@@ -21,9 +23,9 @@ abstract class BaseValidator implements IValidator {
         };
 
     private validated: {
-        body: { [k: string]: object },
-        params: { [k: string]: object },
-        query: { [k: string]: object }
+        body?: {},
+        params?: {},
+        query?: {}
     } = {
             body: {},
             params: {},
@@ -48,92 +50,115 @@ abstract class BaseValidator implements IValidator {
 
     private data: {} = {};
 
-    private currentValidation: keyof typeof this.errors = 'body';
+    private currentValidationKey: keyof IRuleObject = 'body';
+    // {
+    //     body?: {},
+    //     params?: {},
+    //     query?: {}
+    // } = 'body';
 
     protected stopOnFirstError: boolean = false;
 
-    constructor() {
-        this.customRules = this.rules();
-        this.customMessages = this.messages();
-        this.customAttributes = this.attributes();
-    }
+    // constructor() {
+    //     this.customRules = this.rules();
+    //     this.customMessages = this.messages();
+    //     this.customAttributes = this.attributes();
+    // }
 
-    public applyValidationSet(validationSet: IValidationSet): void {
-        this.validationSet = validationSet;
-    }
+    // public applyValidationSet(validationSet: IValidationSet): void {
+    //     this.validationSet = validationSet;
+    // }
 
-    public rules(): IRuleObject {
-        return {
-            body: {},
-            params: {},
-            query: {}
-        }
-    }
+    // public rules(): IRuleObject {
+    //     return {
+    //         body: {},
+    //         params: {},
+    //         query: {}
+    //     }
+    // }
 
-    public messages(): { [k: string]: string } {
-        return {}
-    }
+    // public messages(): { [k: string]: string } {
+    //     return {}
+    // }
 
-    public attributes(): { [k: string]: string } {
-        return {}
-    }
+    // public attributes(): { [k: string]: string } {
+    //     return {}
+    // }
 
     private reset(): void {
         this.data = {};
-        this.currentValidation = 'body';
+        this.customRules = {
+            body: {},
+            params: {},
+            query: {}
+        };
+        this.customMessages = {};
+        this.customAttributes = {};
+        this.currentValidationKey = 'body';
     }
 
-    private beforeValidate(): void {
+    protected beforeValidate(): void {
         this.errors = {
             body: {},
             params: {},
             query: {}
         };
+        this.validated = {
+            body: {},
+            params: {},
+            query: {}
+        };
+
+        this.reset();
+
+        this.customRules = this.validation.rules();
+        this.customMessages = this.validation.messages();
+        this.customAttributes = this.validation.attributes();
+
+    }
+
+    protected afterValidate(): void {
         this.reset();
     }
 
-    private afterValidate(): void {
-        this.reset();
-    }
-
-    private getValidationErrors(): object {
+    protected getValidationErrors(): object {
         const errors: {
             body?: {},
             params?: {},
             query?: {}
         } = {};
 
-        if (Object.keys(this.errors.body).length > 0) {
+        if (this.errors.body && Object.keys(this.errors.body).length > 0) {
             errors.body = { ...this.errors.body }
         }
 
-        if (Object.keys(this.errors.params).length > 0) {
+        if (this.errors.params && Object.keys(this.errors.params).length > 0) {
             errors.params = { ...this.errors.params }
         }
 
-        if (Object.keys(this.errors.query).length > 0) {
+        if (this.errors.query && Object.keys(this.errors.query).length > 0) {
             errors.query = { ...this.errors.query }
         }
 
         return errors;
     }
 
-    private getValidatedData(): object {
+    protected getValidatedData(): object {
         const validated: {
             body?: {},
             params?: {},
             query?: {}
         } = {};
 
-        if (Object.keys(this.validated.body).length > 0) {
+        if (this.validated.body && Object.keys(this.validated.body).length > 0) {
             validated.body = { ...this.validated.body }
         }
 
-        if (Object.keys(this.validated.params).length > 0) {
+        if (this.validated.params && Object.keys(this.validated.params).length > 0) {
             validated.params = { ...this.validated.params }
         }
 
-        if (Object.keys(this.validated.query).length > 0) {
+        if (this.validated.query && Object.keys(this.validated.query).length > 0) {
             validated.query = { ...this.validated.query }
         }
 
@@ -141,11 +166,17 @@ abstract class BaseValidator implements IValidator {
     }
 
     private addError(key: string, error: { name: string, message: string }): void {
-        this.errors[this.currentValidation][key] = { [error.name]: error.message, ...this.errors[this.currentValidation][key] };
+        if (!this.errors[this.currentValidationKey]) {
+            this.errors[this.currentValidationKey] = {};
+        }
+        (this.errors[this.currentValidationKey] as Record<string, object>)[key] = { [error.name]: error.message, ...(this.errors[this.currentValidationKey] as Record<string, object>)[key] };
     }
 
     private addValidData(key: string, error: { name: string, message: string }): void {
-        this.validated[this.currentValidation][key] = { [error.name]: error.message, ...this.validated[this.currentValidation][key] };
+        if (!this.validated[this.currentValidationKey]) {
+            this.validated[this.currentValidationKey] = {};
+        }
+        (this.validated[this.currentValidationKey] as Record<string, object>)[key] = { [error.name]: error.message, ...(this.validated[this.currentValidationKey] as Record<string, object>)[key] };
     }
 
     private getRule(rule: string | Function | BaseRule | [BaseRule, any], key: string): IParsedRule {
@@ -182,7 +213,7 @@ abstract class BaseValidator implements IValidator {
             result.callMessage = () => rule.message(field, message);
         } else if (typeof rule === 'function') {
             result.rule = typeof rule;
-            result.callValidation = async () => await rule(this.data, { key, current: this.currentValidation }, this.fail);
+            result.callValidation = async () => await rule(this.data, { key, current: this.currentValidationKey }, this.fail);
             result.callMessage = null;
         }
 
@@ -224,11 +255,11 @@ abstract class BaseValidator implements IValidator {
                     if (v.callMessage) {
                         const error = v.callMessage();
 
-                        reject({ [this.currentValidation]: { [key]: error } });
+                        reject({ [this.currentValidationKey]: { [key]: error } });
                     }
                 }
 
-                resolve({ [this.currentValidation]: { [key]: this.data[key as keyof typeof this.data] } });
+                resolve({ [this.currentValidationKey]: { [key]: this.data[key as keyof typeof this.data] } });
             });
 
         })
@@ -237,19 +268,21 @@ abstract class BaseValidator implements IValidator {
     }
 
     private async applyValidation(data: object): Promise<void> {
-        this.errors[this.currentValidation] = {};
+        this.errors[this.currentValidationKey] = {};
         this.data = data;
 
         const promises: Promise<object>[] = [];
 
-        for (const key in this.customRules[this.currentValidation]) {
+        for (const key in this.customRules[this.currentValidationKey]) {
 
             const rules = [];
 
-            if (typeof this.customRules[this.currentValidation][key] === 'string') {
-                rules.push(...(this.customRules[this.currentValidation][key] as string).split('|'))
-            } else if (Array.isArray(this.customRules[this.currentValidation][key])) {
-                rules.push(...this.customRules[this.currentValidation][key])
+            const currentValidation = this.customRules[this.currentValidationKey]![key];
+
+            if (typeof currentValidation === 'string') {
+                rules.push(...(currentValidation as string).split('|'))
+            } else if (Array.isArray(currentValidation)) {
+                rules.push(...currentValidation)
             }
 
             promises.push(...this.mapRulesToPromises(rules, key));
@@ -293,15 +326,15 @@ abstract class BaseValidator implements IValidator {
                 throw new Error("Invalid promises array");
             }
         } catch (error: any) {
-            for (const key in error[this.currentValidation]) {
-                this.addError(key, error[this.currentValidation][key]);
+            for (const key in error[this.currentValidationKey]) {
+                this.addError(key, error[this.currentValidationKey][key]);
             }
         }
     }
 
     private handleErrors(errors: Result[]): void {
         for (let i = 0; i < errors.length; i++) {
-            const { reason: { [this.currentValidation]: currentValidation } } = errors[i];
+            const { reason: { [this.currentValidationKey]: currentValidation } } = errors[i];
 
             for (const key in currentValidation) {
                 this.addError(key, currentValidation[key]);
@@ -311,7 +344,7 @@ abstract class BaseValidator implements IValidator {
 
     private handleValidData(valid: Result[]): void {
         for (let i = 0; i < valid.length; i++) {
-            const { value: { [this.currentValidation]: currentValidation } } = valid[i];
+            const { value: { [this.currentValidationKey]: currentValidation } } = valid[i];
 
             for (const key in currentValidation) {
                 this.addValidData(key, currentValidation[key]);
@@ -319,40 +352,44 @@ abstract class BaseValidator implements IValidator {
         }
     }
 
-    private async validateBody(data: object | undefined): Promise<void> {
+    protected async validateBody(data: object | undefined): Promise<void> {
         if (this.customRules.body && data) {
-            this.currentValidation = 'body';
+            this.currentValidationKey = 'body';
             await this.applyValidation(data);
         }
     }
 
-    private async validateParams(data: object | undefined): Promise<void> {
+    protected async validateParams(data: object | undefined): Promise<void> {
         if (this.customRules.params && data) {
-            this.currentValidation = 'params';
+            this.currentValidationKey = 'params';
             await this.applyValidation(data);
         }
     }
 
-    private async validateQuery(data: object | undefined): Promise<void> {
+    protected async validateQuery(data: object | undefined): Promise<void> {
         if (this.customRules.query && data) {
-            this.currentValidation = 'query';
+            this.currentValidationKey = 'query';
             await this.applyValidation(data);
         }
     }
 
-    public async validate(req: IValidationRequest, fail: (error: object, validated: object) => void): Promise<void> {
-        this.fail = fail;
+    abstract setValidation(validation: BaseValidation): void;
+    abstract setValidationSet(validationSet: IValidationSet): void;
+    abstract validate(req: IValidationRequest, fail: (error: object, validated: object) => void): Promise<void>;
 
-        this.beforeValidate();
+    // public async validate(req: IValidationRequest, fail: (error: object, validated: object) => void): Promise<void> {
+    //     this.fail = fail;
 
-        await this.validateBody(req.body);
-        await this.validateParams(req.params);
-        await this.validateQuery(req.query);
+    //     this.beforeValidate();
 
-        this.afterValidate();
+    //     await this.validateBody(req.body);
+    //     await this.validateParams(req.params);
+    //     await this.validateQuery(req.query);
 
-        this.fail(this.getValidationErrors(), this.getValidatedData());
-    }
+    //     this.afterValidate();
+
+    //     this.fail(this.getValidationErrors(), this.getValidatedData());
+    // }
 }
 
 export default BaseValidator

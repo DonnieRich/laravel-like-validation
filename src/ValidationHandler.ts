@@ -1,10 +1,10 @@
 /// <reference types="express" />
-import type { IValidation } from "./contracts/IValidation.js";
+import type { IValidationHandler } from "./contracts/IValidationHandler.js";
 import ValidationError from "./errors/ValidationError.js";
 import type { IValidator } from "./contracts/IValidator.js";
 import type { Request, Response } from "express";
 
-class Validation implements IValidation {
+class ValidationHandler implements IValidationHandler {
 
     private validator: IValidator;
     private validationError!: typeof ValidationError;
@@ -69,7 +69,6 @@ class Validation implements IValidation {
             }
 
             req.locals = { result };
-
             next();
 
         } catch (error: Error | ValidationError | any) {
@@ -88,4 +87,4 @@ class Validation implements IValidation {
     }
 }
 
-export default Validation
+export default ValidationHandler;
