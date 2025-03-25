@@ -66,7 +66,6 @@ describe("ValidationFactory", () => {
 
     test("should throw an error if the validation fails", async () => {
         const factory = new ValidationFactory();
-        // console.log(validation.rules())
         const middleware = factory.make(validation);
         const req = { body: data.invalid.body };
         const res = {};
@@ -89,6 +88,77 @@ describe("ValidationFactory", () => {
                 })
             })
         }));
+    });
+
+    test("should pass the error inside req.locals if throwOnError is false", async () => {
+        const factory = new ValidationFactory();
+        const middleware = factory.doNotThrow().make(validation);
+        const req = { body: data.invalid.body };
+        const res = {};
+        const next = vi.spyOn(utils, 'next').mockImplementation(() => next)
+
+        await middleware(req, res, next);
+
+        expect(next).toHaveBeenCalled();
+        expect(next).toHaveBeenCalledWith();
+        expect(req).toHaveProperty('locals');
+        expect(req).toMatchObject({
+            locals: {
+                result: {
+                    status: 422,
+                    errors: {
+                        body: {
+                            title: {
+                                required: "The title field is required"
+                            },
+                            content: {
+                                required: "The content field is required"
+                            }
+                        }
+                    },
+                    validated: {}
+                }
+            }
+        })
+    });
+
+    test("should not throw an error if the validation passes", async () => {
+        const factory = new ValidationFactory();
+        const middleware = factory.make(validation);
+        const req = { body: data.valid.body };
+        const res = {};
+        const next = vi.spyOn(utils, 'next').mockImplementation(() => next)
+
+        await middleware(req, res, next);
+
+        expect(next).not.toHaveBeenCalledWith(new ValidationError({}));
+    });
+
+    test("should pass the validated values inside req.locals if the validation passes", async () => {
+        const factory = new ValidationFactory();
+        const middleware = factory.make(validation);
+        const req = { body: data.valid.body };
+        const res = {};
+        const next = vi.spyOn(utils, 'next').mockImplementation(() => next)
+
+        await middleware(req, res, next);
+
+        expect(next).not.toHaveBeenCalledWith(new ValidationError({}));
+        expect(req).toHaveProperty('locals');
+        expect(req).toMatchObject({
+            locals: {
+                result: {
+                    errors: {},
+                    validated: {
+                        body: {
+                            title: "Hello World",
+                            content: "This is a test"
+                        }
+                    }
+
+                }
+            }
+        })
     });
 
 })

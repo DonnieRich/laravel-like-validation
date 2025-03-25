@@ -33,7 +33,7 @@ abstract class BaseValidationFactory {
         return this;
     }
 
-    abstract make(validation: BaseValidation, throwOnError: boolean): Function;
+    abstract make(validation: BaseValidation): Function;
 }
 
 export default BaseValidationFactory;

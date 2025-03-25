@@ -13,9 +13,9 @@ abstract class BaseValidator {
     protected validation!: BaseValidation;
 
     private errors: {
-        body?: {},
-        params?: {},
-        query?: {}
+        body?: { [key: string]: object },
+        params?: { [key: string]: object },
+        query?: { [key: string]: object }
     } = {
             body: {},
             params: {},
@@ -23,9 +23,9 @@ abstract class BaseValidator {
         };
 
     private validated: {
-        body?: {},
-        params?: {},
-        query?: {}
+        body?: { [key: string]: string },
+        params?: { [key: string]: string },
+        query?: { [key: string]: string }
     } = {
             body: {},
             params: {},
@@ -51,39 +51,8 @@ abstract class BaseValidator {
     private data: {} = {};
 
     private currentValidationKey: keyof IRuleObject = 'body';
-    // {
-    //     body?: {},
-    //     params?: {},
-    //     query?: {}
-    // } = 'body';
 
     protected stopOnFirstError: boolean = false;
-
-    // constructor() {
-    //     this.customRules = this.rules();
-    //     this.customMessages = this.messages();
-    //     this.customAttributes = this.attributes();
-    // }
-
-    // public applyValidationSet(validationSet: IValidationSet): void {
-    //     this.validationSet = validationSet;
-    // }
-
-    // public rules(): IRuleObject {
-    //     return {
-    //         body: {},
-    //         params: {},
-    //         query: {}
-    //     }
-    // }
-
-    // public messages(): { [k: string]: string } {
-    //     return {}
-    // }
-
-    // public attributes(): { [k: string]: string } {
-    //     return {}
-    // }
 
     private reset(): void {
         this.data = {};
@@ -169,14 +138,14 @@ abstract class BaseValidator {
         if (!this.errors[this.currentValidationKey]) {
             this.errors[this.currentValidationKey] = {};
         }
-        (this.errors[this.currentValidationKey] as Record<string, object>)[key] = { [error.name]: error.message, ...(this.errors[this.currentValidationKey] as Record<string, object>)[key] };
+        this.errors[this.currentValidationKey]![key] = { [error.name]: error.message, ...this.errors[this.currentValidationKey]![key] };
     }
 
-    private addValidData(key: string, error: { name: string, message: string }): void {
+    private addValidData(key: string, value: string): void {
         if (!this.validated[this.currentValidationKey]) {
             this.validated[this.currentValidationKey] = {};
         }
-        (this.validated[this.currentValidationKey] as Record<string, object>)[key] = { [error.name]: error.message, ...(this.validated[this.currentValidationKey] as Record<string, object>)[key] };
+        this.validated[this.currentValidationKey]![key] = value;
     }
 
     private getRule(rule: string | Function | BaseRule | [BaseRule, any], key: string): IParsedRule {
@@ -377,19 +346,6 @@ abstract class BaseValidator {
     abstract setValidationSet(validationSet: IValidationSet): void;
     abstract validate(req: IValidationRequest, fail: (error: object, validated: object) => void): Promise<void>;
 
-    // public async validate(req: IValidationRequest, fail: (error: object, validated: object) => void): Promise<void> {
-    //     this.fail = fail;
-
-    //     this.beforeValidate();
-
-    //     await this.validateBody(req.body);
-    //     await this.validateParams(req.params);
-    //     await this.validateQuery(req.query);
-
-    //     this.afterValidate();
-
-    //     this.fail(this.getValidationErrors(), this.getValidatedData());
-    // }
 }
 
 export default BaseValidator
