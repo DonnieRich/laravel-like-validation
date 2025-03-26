@@ -54,6 +54,9 @@ abstract class BaseValidator {
 
     protected stopOnFirstError: boolean = false;
 
+    private foundInvalidRule: boolean = false;
+    private invalidRuleMessage: string = "";
+
     private reset(): void {
         this.data = {};
         this.customRules = {
@@ -61,12 +64,6 @@ abstract class BaseValidator {
             params: {},
             query: {}
         };
-        this.customMessages = {};
-        this.customAttributes = {};
-        this.currentValidationKey = 'body';
-    }
-
-    protected beforeValidate(): void {
         this.errors = {
             body: {},
             params: {},
@@ -77,6 +74,16 @@ abstract class BaseValidator {
             params: {},
             query: {}
         };
+        this.customMessages = {};
+        this.customAttributes = {};
+        this.currentValidationKey = 'body';
+
+        this.foundInvalidRule = false;
+        this.invalidRuleMessage = "";
+    }
+
+    protected beforeValidate(): void {
+
 
         this.reset();
 
@@ -87,7 +94,7 @@ abstract class BaseValidator {
     }
 
     protected afterValidate(): void {
-        this.reset();
+        // this.reset();
     }
 
     protected getValidationErrors(): object {
@@ -197,7 +204,8 @@ abstract class BaseValidator {
         }
 
         if (result.rule === null) {
-            throw new Error(`Invalid rule ${rule} applied to ${key}`);
+            this.foundInvalidRule = true;
+            this.invalidRuleMessage = `Invalid rule ${rule} applied to ${key}`;
         }
 
         return result;
@@ -209,9 +217,7 @@ abstract class BaseValidator {
 
         const promises = rules.map(async rule => {
 
-
             const v = this.getRule(rule, key);
-
 
             return await new Promise<object>(async (resolve, reject) => {
 
@@ -234,9 +240,11 @@ abstract class BaseValidator {
         })
 
         return promises;
+
     }
 
     private async applyValidation(data: object): Promise<void> {
+
         this.errors[this.currentValidationKey] = {};
         this.data = data;
 
@@ -262,43 +270,39 @@ abstract class BaseValidator {
             method = 'all';
         }
 
-        await this.handlePromises(method, promises);
+        if (this.foundInvalidRule) {
+            throw new Error(this.invalidRuleMessage);
+        }
 
+        await this.handlePromises(method, promises);
 
     }
 
     private async handlePromises(method: 'allSettled' | 'all', promises: Promise<object>[]): Promise<void> {
 
-        try {
+        const results = await Promise[method].call(Promise, promises);
 
-            const results = await Promise[method].call(Promise, promises);
+        if (Array.isArray(results)) {
 
+            const [resolved, rejected] = (results as Result[]).reduce<[Result[], Result[]]>((acc, result) => {
 
-            if (Array.isArray(results)) {
+                if (result.status === 'fulfilled') {
+                    acc[0].push(result);
+                } else {
+                    acc[1].push(result);
+                }
 
-                const [resolved, rejected] = (results as Result[]).reduce<[Result[], Result[]]>((acc, result) => {
+                return acc;
 
-                    if (result.status === 'fulfilled') {
-                        acc[0].push(result);
-                    } else {
-                        acc[1].push(result);
-                    }
+            }, [[], []]);
 
-                    return acc;
+            this.handleErrors(rejected);
+            this.handleValidData(resolved);
 
-                }, [[], []]);
-
-                this.handleErrors(rejected);
-                this.handleValidData(resolved);
-
-            } else {
-                throw new Error("Invalid promises array");
-            }
-        } catch (error: any) {
-            for (const key in error[this.currentValidationKey]) {
-                this.addError(key, error[this.currentValidationKey][key]);
-            }
+        } else {
+            throw new Error("Invalid promises array");
         }
+
     }
 
     private handleErrors(errors: Result[]): void {

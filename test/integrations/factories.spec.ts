@@ -4,7 +4,28 @@ import ValidationFactory from '../../src/factories/ValidationFactory';
 import ValidationError from "../../src/errors/ValidationError";
 import { afterEach } from "node:test";
 
-let validation;
+const validation = new class TestValidation extends BaseValidation {
+    rules() {
+        return {
+            body: {
+                title: 'required|max:255',
+                content: 'required'
+            }
+        };
+    }
+};
+
+const malformedValidation = new class TestValidation extends BaseValidation {
+    rules() {
+        return {
+            body: {
+                title: 'invalidRule',
+                content: 'required'
+            }
+        };
+    }
+}
+
 const data = {
     valid: {
         body: {
@@ -20,30 +41,11 @@ const data = {
 }
 
 const utils = {
-    next: (error) => {
-        return error;
-    }
+    next: (error) => error
 }
-
-beforeAll(() => {
-    validation = new class TestValidation extends BaseValidation {
-        rules() {
-            return {
-                body: {
-                    title: 'required|max:255',
-                    content: 'required'
-                }
-            };
-        }
-    }
-});
 
 afterEach(() => {
     vi.restoreAllMocks();
-});
-
-afterAll(() => {
-    validation = null;
 });
 
 describe("ValidationFactory", () => {
@@ -100,7 +102,6 @@ describe("ValidationFactory", () => {
         await middleware(req, res, next);
 
         expect(next).toHaveBeenCalled();
-        expect(next).toHaveBeenCalledWith();
         expect(req).toHaveProperty('locals');
         expect(req).toMatchObject({
             locals: {
@@ -159,6 +160,19 @@ describe("ValidationFactory", () => {
                 }
             }
         })
+    });
+
+    test("should throw an error if validation rules are malformed", async () => {
+        const factory = new ValidationFactory();
+        const middleware = factory.make(malformedValidation);
+        const req = { body: data.valid.body };
+        const res = {};
+        const next = vi.spyOn(utils, 'next').mockImplementation(() => next)
+
+        await middleware(req, res, next);
+
+        expect(next).toHaveBeenCalledWith({ status: 500, errors: "Invalid rule invalidRule applied to title" });
+
     });
 
 })

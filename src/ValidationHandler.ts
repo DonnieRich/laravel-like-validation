@@ -71,7 +71,7 @@ class ValidationHandler implements IValidationHandler {
             req.locals = { result };
             next();
 
-        } catch (error: Error | ValidationError | any) {
+        } catch (error: any) {
             if (error.prototype instanceof ValidationError || error instanceof ValidationError) {
                 next(error)
             } else {
