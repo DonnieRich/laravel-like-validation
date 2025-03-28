@@ -17,34 +17,34 @@ describe("Required", () => {
 
     describe("String", () => {
 
-        test("Should return true on a non-empty string", () => {
+        test("Should return true on a non-empty string", async () => {
             const required = new Required();
 
-            const result = required.validate(mockRequestObject, "content");
+            const result = await required.validate(mockRequestObject, "content");
 
             expect(result).toBeTruthy();
         });
 
-        test("Should return false on empty string", () => {
+        test("Should return false on empty string", async () => {
             const required = new Required();
 
-            const result = required.validate(mockRequestObject, "title");
+            const result = await required.validate(mockRequestObject, "title");
 
             expect(result).toBeFalsy();
         });
 
-        test("Should return an object in case of fail", () => {
+        test("Should return an object in case of fail", async () => {
             const required = new Required();
 
-            const result = required.message("title");
+            const result = await required.message("title");
 
             expect(result).toEqual({ name: "required", message: "The title field is required" })
         });
 
-        test("Should return a custom error message", () => {
+        test("Should return a custom error message", async () => {
             const required = new Required();
 
-            const result = required.message("title", "Please fill the required field: {field}");
+            const result = await required.message("title", "Please fill the required field: {field}");
 
             expect(result.message).toBe("Please fill the required field: title");
         });
@@ -53,18 +53,18 @@ describe("Required", () => {
 
     describe("Array", () => {
 
-        test("Should return true on a non-empty array", () => {
+        test("Should return true on a non-empty array", async () => {
             const required = new Required();
 
-            const result = required.validate(mockRequestObject, "tags");
+            const result = await required.validate(mockRequestObject, "tags");
 
             expect(result).toBeTruthy();
         });
 
-        test("Should return false on an empty array", () => {
+        test("Should return false on an empty array", async () => {
             const required = new Required();
 
-            const result = required.validate(mockRequestObject, "emptyArray");
+            const result = await required.validate(mockRequestObject, "emptyArray");
 
             expect(result).toBeFalsy();
         });
@@ -73,18 +73,18 @@ describe("Required", () => {
 
     describe("Object", () => {
 
-        test("Should return true on a non-empty object", () => {
+        test("Should return true on a non-empty object", async () => {
             const required = new Required();
 
-            const result = required.validate(mockRequestObject, "author");
+            const result = await required.validate(mockRequestObject, "author");
 
             expect(result).toBeTruthy();
         });
 
-        test("Should return false on empty object", () => {
+        test("Should return false on empty object", async () => {
             const required = new Required();
 
-            const result = required.validate(mockRequestObject, "emptyObject");
+            const result = await required.validate(mockRequestObject, "emptyObject");
 
             expect(result).toBeFalsy();
         });
@@ -93,26 +93,26 @@ describe("Required", () => {
 
     describe("Generic", () => {
 
-        test("Should return a normalized classname", () => {
+        test("Should return a normalized classname", async () => {
             const required = new Required();
 
-            const name = required.getName();
+            const name = await required.getName();
 
             expect(name).toBe("required");
         });
 
-        test("Should have a default error message", () => {
+        test("Should have a default error message", async () => {
             const required = new Required();
 
-            const error = required.getError();
+            const error = await required.getError();
 
             expect(error).toBe("The {field} field is required");
         });
 
-        test("Should return false on undefined", () => {
+        test("Should return false on undefined", async () => {
             const required = new Required();
 
-            const result = required.validate(mockRequestObject, "nonExistingProperty");
+            const result = await required.validate(mockRequestObject, "nonExistingProperty");
 
             expect(result).toBeFalsy();
         });
