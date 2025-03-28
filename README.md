@@ -31,16 +31,65 @@ yarn add @ricciodev/laravel-like-validation
 ### ESM
 
 ```js
-import { ValidationFactory, BaseValidator } from '@ricciodev/laravel-like-validation';
+import { ValidationFacade } from '@ricciodev/laravel-like-validation';
 ```
 
 ### CJS
 
 ```js
-const { ValidationFactory, BaseValidator } = require('@ricciodev/laravel-like-validation');
+const { ValidationFacade } = require('@ricciodev/laravel-like-validation');
 ```
 
 ## Basic Usage
+
+### Using the Validation Facade class
+
+Create a new file `ArticlePostRequestValidation.ts`:
+
+```ts
+import { ValidationFacade } from '@ricciodev/laravel-like-validation';
+
+const rules = {
+    body: {
+            title: 'required|max:255',
+            content: 'required'
+    }
+};
+
+const messages = {
+    'title.required': 'The title field is required.',
+    'title.max': 'The title may not be greater than 255 characters.',
+    'content.required': 'The content field is required.'
+};
+
+const ArticlePostRequestValidation = ValidationFacade.createValidator(rules, messages);
+
+export default ArticlePostRequestValidation;
+```
+
+### Applying Middleware in ExpressJS
+
+In your ExpressJS route file, apply the middleware:
+
+```js
+import express from 'express';
+import ArticlePostRequestValidation from './ArticlePostRequestValidation';
+
+const app = express();
+app.use(express.json());
+
+app.post('/articles', ArticlePostRequestValidation, (req, res) => {
+        res.send('Article is valid!');
+});
+
+app.listen(3000, () => {
+        console.log('Server is running on port 3000');
+});
+```
+
+That's it! You now have a basic setup for using Laravel-like validation in your ExpressJS application.
+
+## Advanced usage
 
 ### Creating a Validation Class
 
@@ -50,22 +99,22 @@ Create a new file `ArticlePostRequestValidation.ts`:
 import BaseValidator from '@ricciodev/laravel-like-validation';
 
 class ArticlePostRequestValidation extends BaseValidator {
-        rules() {
-                return {
-                        body: {
-                                title: 'required|max:255',
-                                content: 'required'
-                        }
-                };
-        }
+    rules() {
+            return {
+                    body: {
+                            title: 'required|max:255',
+                            content: 'required'
+                    }
+            };
+    }
 
-        messages() {
-                return {
-                        'title.required': 'The title field is required.',
-                        'title.max': 'The title may not be greater than 255 characters.',
-                        'content.required': 'The content field is required.'
-                };
-        }
+    messages() {
+            return {
+                    'title.required': 'The title field is required.',
+                    'title.max': 'The title may not be greater than 255 characters.',
+                    'content.required': 'The content field is required.'
+            };
+    }
 }
 
 export default ArticlePostRequestValidation;
@@ -84,25 +133,3 @@ const validator = new ArticlePostRequestValidation();
 
 export const validationMiddleware = factory.make(validator);
 ```
-
-### Applying Middleware in ExpressJS
-
-In your ExpressJS route file, apply the middleware:
-
-```js
-import express from 'express';
-import { validationMiddleware } from './validationMiddleware';
-
-const app = express();
-app.use(express.json());
-
-app.post('/articles', validationMiddleware, (req, res) => {
-        res.send('Article is valid!');
-});
-
-app.listen(3000, () => {
-        console.log('Server is running on port 3000');
-});
-```
-
-That's it! You now have a basic setup for using Laravel-like validation in your ExpressJS application.
