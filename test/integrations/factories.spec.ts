@@ -79,16 +79,16 @@ describe("ValidationFactory", () => {
         expect(next).toHaveBeenCalledWith(new ValidationError({}));
         expect(next).toHaveBeenCalledWith(expect.objectContaining({ status: 422 }));
         expect(next).toHaveBeenCalledWith(expect.objectContaining({
-            errors: expect.objectContaining({
-                body: expect.objectContaining({
-                    title: expect.objectContaining({
+            errors: {
+                body: {
+                    title: {
                         required: "The title field is required",
-                    }),
-                    content: expect.objectContaining({
+                    },
+                    content: {
                         required: "The content field is required",
-                    })
-                })
-            })
+                    }
+                }
+            }
         }));
     });
 

@@ -5,32 +5,24 @@ import type { IRuleObject } from "../contracts/IRuleObject.js";
 import type { IParsedRule } from "../contracts/IParsedRule.js";
 import type { Result } from "../types/Result.js";
 import type BaseValidation from "./BaseValidation.js";
-import type { ValidationKeys } from "../types/ValidationKeys.js";
+import type { ErrorKeys, ErrorKeysType, ErrorPartialKeys, ValidatedKeys, ValidatedKeysType, ValidatedPartialKeys } from "../types/ValidationKeys.js";
 
 
 abstract class BaseValidator {
     protected validationSet!: IValidationSet;
     protected validation!: BaseValidation;
 
-    private errors: {
-        body?: { [key: string]: object },
-        params?: { [key: string]: object },
-        query?: { [key: string]: object }
-    } = {
-            body: {},
-            params: {},
-            query: {}
-        };
+    private errors: ErrorPartialKeys = {
+        body: {},
+        params: {},
+        query: {}
+    };
 
-    private validated: {
-        body?: { [key: string]: string },
-        params?: { [key: string]: string },
-        query?: { [key: string]: string }
-    } = {
-            body: {},
-            params: {},
-            query: {}
-        };
+    private validated: ValidatedPartialKeys = {
+        body: {},
+        params: {},
+        query: {}
+    };
 
     protected customRules: IRuleObject = {
         body: {},
@@ -50,7 +42,7 @@ abstract class BaseValidator {
 
     private data: {} = {};
 
-    private currentValidationKey: keyof IRuleObject = 'body';
+    private currentValidationKey: ErrorKeysType = 'body';
 
     protected stopOnFirstError: boolean = false;
 
@@ -84,7 +76,6 @@ abstract class BaseValidator {
 
     protected beforeValidate(): void {
 
-
         this.reset();
 
         this.customRules = this.validation.rules();
@@ -94,7 +85,7 @@ abstract class BaseValidator {
     }
 
     protected afterValidate(): void {
-        // this.reset();
+
     }
 
     protected getValidationErrors(): object {
