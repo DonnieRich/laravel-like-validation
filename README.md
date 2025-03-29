@@ -6,11 +6,21 @@ A package for a Laravel-Like Validation structure on ExpressJS.
 
 - [Installation](#installation)
 - [Importing](#importing)
-- [Basic Usage](#basic-usage)
-    - [Creating a Validation Class](#creating-a-validation-class)
-    - [Using Validation Rules](#using-validation-rules)
-    - [Creating Middleware](#creating-middleware)
-    - [Applying Middleware in ExpressJS](#applying-middleware-in-expressjs)
+- [Basic Usage](#basic)
+    - [Use the Validation Facade class](#use-the-validation-facade-class)
+    - [Apply the Middleware in ExpressJS](#apply-the-middleware-in-expressjs)
+- [Validation errors](#validation-errors)
+- [Custom validation errors](#custom-validation-errors)
+- [Custom field name](#custom-field-name)
+- [Validated data](#validated-data)
+- [Advanced](#advanced)
+    - [withValidationSet](#withvalidationset)
+    - [withValidationError](#withvalidationerror)
+    - [doNotThrow](#donotthrow)
+    - [Create a Validation Class](#create-a-validation-class)
+    - [Create the Middleware](#create-the-middleware)
+- [Available validations](#available-validations)
+    - [Next steps](#next-steps)
 
 ## Installation
 
@@ -40,9 +50,9 @@ import { ValidationFacade } from '@ricciodev/laravel-like-validation';
 const { ValidationFacade } = require('@ricciodev/laravel-like-validation');
 ```
 
-## Basic Usage
+## Basic
 
-### Using the Validation Facade class
+### Use the Validation Facade class
 
 Create a new file `ArticlePostRequestValidation.ts`:
 
@@ -51,23 +61,17 @@ import { ValidationFacade } from '@ricciodev/laravel-like-validation';
 
 const rules = {
     body: {
-            title: 'required|max:255',
-            content: 'required'
+        title: 'required|max:255',
+        content: 'required'
     }
 };
 
-const messages = {
-    'title.required': 'The title field is required.',
-    'title.max': 'The title may not be greater than 255 characters.',
-    'content.required': 'The content field is required.'
-};
-
-const ArticlePostRequestValidation = ValidationFacade.createValidator(rules, messages);
+const ArticlePostRequestValidation = ValidationFacade.make(rules);
 
 export default ArticlePostRequestValidation;
 ```
 
-### Applying Middleware in ExpressJS
+### Apply the Middleware in ExpressJS
 
 In your ExpressJS route file, apply the middleware:
 
@@ -89,16 +93,111 @@ app.listen(3000, () => {
 
 That's it! You now have a basic setup for using Laravel-like validation in your ExpressJS application.
 
-## Advanced usage
+## Validation errors
 
-### Creating a Validation Class
+The errors have the following structure (based on the previous example):
+
+```js
+{
+    status: 422,
+    errors: {
+        body: {
+            title: {
+                max: 'The title must have a max length of 255'
+            },
+            content: {
+                required: 'The content field is required'
+            }
+        }
+    },
+    validated: {}
+}
+```
+
+## Custom validation errors
+
+You can define a `messages` object to customize the error message for the specific validation. You can pass this as the second parameter to the `make` method.
+
+```js
+const messages = {
+    'title.required': 'Please add a title.',
+    'title.max': 'Be sure the title is no longer than 255 characters.',
+    'content.required': 'Please provide the content.'
+};
+
+const ArticlePostRequestValidation = ValidationFacade.make(rules, messages);
+```
+
+Based on the type of validation used, you can also use the `{field}` and `{value}` placeholder to customize the error message.
+The following example gives the exact same result of the previous code snippet, but this time the error will always be coherent with the value provided in the validation.
+```js
+const messages = {
+    'title.required': 'Please add a title.',
+    'title.max': 'Be sure the title is no longer than {value} characters.',
+    'content.required': 'Please provide the content.'
+};
+
+const ArticlePostRequestValidation = ValidationFacade.make(rules, messages);
+```
+
+## Custom field name
+
+You can also define `attributes` to customize the field name in the error message and pass them as the third parameter to the `make` method.
+
+```js
+const attributes = {
+    'title': 'Post title',
+    'content': 'Post content'
+};
+
+const ArticlePostRequestValidation = ValidationFacade.make(rules, messages, attributes);
+```
+
+## Validated data
+
+If the validation passes the validated, you will find a `result` field inside `req.locals`. This makes them available to the next middleware/controller in the callback chain.
+As you can see there is also an `errors` field if you decide to use the advanced method described in the [doNotThrow](#donotthrow) section.
+
+```js
+result: {
+    errors: {},
+    validated: {
+        body: {
+            title: "Hello World",
+            content: "This is a test"
+        }
+    }
+}
+```
+
+## Advanced
+
+For advanced needs you can use the ValidationFactory.
+This class has the following methods that can be chained before calling `make()`.
+
+### withValidationSet
+
+The `withValidationSet` method accept an `IValidationSet` instance for a custom validation set. The `ValidationSet` is the default and already implements all the basic
+validation rules and an `add()` method for adding new custom rules extending the `BaseRule` class.
+If you want to create your custom rules and make them available for every validation, you can extend the `ValidationSet` and register the new rules using the `add()` method.
+
+### withValidationError
+
+The `withValidationError` method accept a `typeof ValidationError`. This way you can customize the error object used by the `ValidationHandler`.
+
+### doNotThrow
+
+The `doNotThrow` is a method that gives you more control on what should happen if the validation fails. If called before the `make()` method instructs the `ValidationHandler` to not throw an exception on a failed validation and to continue with the regular middleware chain in Express.
+This means you can then handle the errors inside the next middleware/controller.
+
+### Create a Validation Class
 
 Create a new file `ArticlePostRequestValidation.ts`:
 
 ```ts
-import BaseValidator from '@ricciodev/laravel-like-validation';
+import BaseValidation from '@ricciodev/laravel-like-validation';
 
-class ArticlePostRequestValidation extends BaseValidator {
+class ArticlePostRequestValidation extends BaseValidation {
     rules() {
             return {
                     body: {
@@ -120,7 +219,7 @@ class ArticlePostRequestValidation extends BaseValidator {
 export default ArticlePostRequestValidation;
 ```
 
-### Creating Middleware
+### Create the Middleware
 
 Create a new file `validationMiddleware.ts`:
 
@@ -133,3 +232,22 @@ const validator = new ArticlePostRequestValidation();
 
 export const validationMiddleware = factory.make(validator);
 ```
+
+You can then apply this middleware in the ExpressJS route, as seen before.
+
+## Available validations
+
+This is a list of all available validations
+
+### is_array
+
+Check if the field is an array.
+Usage:
+
+```js
+body: {
+    tags: 'is_array'
+}
+```
+
+### Next steps
