@@ -4,7 +4,7 @@ import ValidationFactory from "../factories/ValidationFactory.js";
 
 class ValidationFacade {
 
-    static createValidator(rules: IRuleObject, messages: { [key: string]: string } = {}, attributes: { [key: string]: string } = {}) {
+    static make(rules: IRuleObject, messages: { [key: string]: string } = {}, attributes: { [key: string]: string } = {}) {
         const validation = new class extends BaseValidation {
             rules() {
                 return rules;
