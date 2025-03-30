@@ -52,6 +52,78 @@ const { ValidationFacade } = require('@ricciodev/laravel-like-validation');
 
 ## Basic
 
+You can validate the following request fields: body, query and params.
+For any of these fields you can specify the input you want to validate and the rules to apply.
+
+To apply the rules you can choose between `string` and `array` syntax:
+```js
+
+// rules as string
+{
+    body: {
+        title: 'required|min:5'
+    }
+}
+
+// rules as array
+{
+    body: {
+        title: ['required', 'min:5']
+    }
+}
+```
+
+The advantage of the `array` syntax is that enables you to pass custom validation rules.
+You can pass them as anonymous functions.
+The first argument is the whole `data` received, the second argument is an object containing the `current` validation (`body`, `query` or `params`) and the `key` is the field beign validated.
+The last argument is the `fail` callback. To this callback you should pass one argument representing the validation error.
+
+```js
+
+{
+    body: {
+        title: ['required', (data, { current, key }, fail) => {
+
+            const emptyTag = data[key].some(tag => tag.trim() === '');
+
+            if (emptyTag) {
+                fail({ [current]: { [key]: { 'empty-items': 'Tags cannot have empty items' } } });
+            }
+
+        }]
+    }
+}
+```
+
+You can also use the `BaseRule` class to create a custom validation rule. In this case you should define the `error` property with the validation error to return.
+In this string you can use placeholders. Make sure to call the `generateMessage` method passing an object with properties matching the placeholder names, as first argument.
+
+The validate method should return a `boolean` value to notify if the validation check passed or failed.
+
+Defining rules this way is great for reducing code duplication. You can register your custom rules inside the `ValidationSet` as described in the [Advanced](#advanced) -> [withValidationSet](#withvalidationset) section.
+
+```js
+const { BaseRule } = require('@ricciodev/laravel-like-validation')
+
+export default class Uppercase extends BaseRule {
+
+    error = "The {field} field must be all in uppercase"
+
+    validate(data, field) {
+        const text = data[field] ?? '';
+        return text.toUpperCase() === data[field];
+    }
+
+    message(field, message = '') {
+        return {
+            name: this.getName(),
+            message: this.generateMessage({ field }, message)
+        }
+    }
+
+}
+```
+
 ### Use the Validation Facade class
 
 Create a new file `ArticlePostRequestValidation.ts`:
@@ -177,7 +249,7 @@ This class has the following methods that can be chained before calling `make()`
 
 ### withValidationSet
 
-The `withValidationSet` method accept an `IValidationSet` instance for a custom validation set. The `ValidationSet` is the default and already implements all the basic
+The `withValidationSet` method accept an `IValidationSet` instance for a custom validation set. `ValidationSet` is the default class and already implements all the basic
 validation rules and an `add()` method for adding new custom rules extending the `BaseRule` class.
 If you want to create your custom rules and make them available for every validation, you can extend the `ValidationSet` and register the new rules using the `add()` method.
 
