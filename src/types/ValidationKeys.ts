@@ -9,9 +9,9 @@ export type ErrorKeysType = keyof ErrorKeys;
 export type ErrorPartialKeys = Partial<ErrorKeys>;
 
 export type ValidatedKeys = {
-    body?: { [key: string]: string };
-    params?: { [key: string]: string };
-    query?: { [key: string]: string };
+    body?: { [key: string]: string | Array<any> };
+    params?: { [key: string]: string | Array<any> };
+    query?: { [key: string]: string | Array<any> };
 };
 
 export type ValidatedKeysType = keyof ValidatedKeys;
