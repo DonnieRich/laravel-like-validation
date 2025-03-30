@@ -37,7 +37,9 @@ class ValidationHandler implements IValidationHandler {
         const merged: { [key: string]: object } = { ...start }
 
         for (const key in validated) {
-            if (typeof validated[key as keyof typeof validated] === 'object') {
+            if (Array.isArray(validated[key as keyof typeof validated])) {
+                merged[key] = validated[key as keyof typeof validated]
+            } else if (typeof validated[key as keyof typeof validated] === 'object') {
                 merged[key] = { ...this.mergeValidated(validated[key as keyof typeof validated], merged[key]) }
             } else {
                 merged[key] = validated[key as keyof typeof validated]
