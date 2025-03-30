@@ -133,16 +133,10 @@ abstract class BaseValidator {
     }
 
     private addError(key: string, error: { name: string, message: string }): void {
-        if (!this.errors[this.currentValidationKey]) {
-            this.errors[this.currentValidationKey] = {};
-        }
         this.errors[this.currentValidationKey]![key] = { [error.name]: error.message, ...this.errors[this.currentValidationKey]![key] };
     }
 
-    private addValidData(key: string, value: string): void {
-        if (!this.validated[this.currentValidationKey]) {
-            this.validated[this.currentValidationKey] = {};
-        }
+    private addValidData(key: string, value: string | Array<any>): void {
         this.validated[this.currentValidationKey]![key] = value;
     }
 
