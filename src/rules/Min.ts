@@ -19,10 +19,10 @@ class Min extends BaseRule {
         }
 
         if (isArray || isString) {
-            const length = data[field]?.length ?? 0;
+            const length = data[field].length;
             return length >= validationValue
         } else if (isNumber) {
-            const length = data[field] ?? 0;
+            const length = data[field];
             return length >= validationValue
         } else {
 
