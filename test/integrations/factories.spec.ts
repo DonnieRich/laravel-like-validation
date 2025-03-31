@@ -3,6 +3,8 @@ import BaseValidation from '../../src/base/BaseValidation';
 import ValidationFactory from '../../src/factories/ValidationFactory';
 import ValidationError from "../../src/errors/ValidationError";
 import { afterEach } from "node:test";
+import ValidationSet from "../../src/ValidationSet";
+import BaseRule from "../../src/base/BaseRule";
 
 const validation = new class TestValidation extends BaseValidation {
     rules() {
@@ -24,6 +26,17 @@ const malformedValidation = new class TestValidation extends BaseValidation {
             }
         };
     }
+}
+
+const customValidation = new class TestValidation extends BaseValidation {
+    rules() {
+        return {
+            body: {
+                title: 'custom_rule',
+            }
+        };
+    }
+
 }
 
 const data = {
@@ -175,4 +188,156 @@ describe("ValidationFactory", () => {
 
     });
 
+    test("should apply custom validationSet", async () => {
+
+        const customRule = new class CustomRule extends BaseRule {
+
+            protected error = 'The {field} field is invalid';
+
+            async validate() {
+                return false;
+            }
+
+            message(field: string, message: string) {
+                return {
+                    name: this.getName(),
+                    message: this.generateMessage({ field }, message)
+                }
+            }
+        }
+
+        const customValidationSet = new ValidationSet();
+        customValidationSet.add(customRule);
+        const middleware = new ValidationFactory().withValidationSet(customValidationSet).make(customValidation);
+
+        const req = { body: data.invalid.body };
+        const res = {};
+        const next = vi.spyOn(utils, 'next').mockImplementation(() => next)
+
+        await middleware(req, res, next);
+
+        expect(next).toHaveBeenCalled();
+        expect(next).toHaveBeenCalledWith(new ValidationError({}));
+        expect(next).toHaveBeenCalledWith(expect.objectContaining({ status: 422 }));
+        expect(next).toHaveBeenCalledWith(expect.objectContaining({
+            errors: {
+                body: {
+                    title: {
+                        custom_rule: "The title field is invalid",
+                    },
+                }
+            }
+        }));
+    });
+
+    test("should apply custom validationSet and show default validation error for custom rule", async () => {
+
+        const customRule = new class CustomRule extends BaseRule {
+
+            async validate() {
+                return false;
+            }
+
+            message(field: string, message: string) {
+                return {
+                    name: this.getName(),
+                    message: this.generateMessage({ field }, message)
+                }
+            }
+        }
+
+        const customValidationSet = new ValidationSet();
+        customValidationSet.add(customRule);
+        const middleware = new ValidationFactory().withValidationSet(customValidationSet).make(customValidation);
+
+        const req = { body: data.invalid.body };
+        const res = {};
+        const next = vi.spyOn(utils, 'next').mockImplementation(() => next)
+
+        await middleware(req, res, next);
+
+        expect(next).toHaveBeenCalled();
+        expect(next).toHaveBeenCalledWith(new ValidationError({}));
+        expect(next).toHaveBeenCalledWith(expect.objectContaining({ status: 422 }));
+        expect(next).toHaveBeenCalledWith(expect.objectContaining({
+            errors: {
+                body: {
+                    title: {
+                        custom_rule: "Missing default error message for custom_rule applied on title",
+                    },
+                }
+            }
+        }));
+    });
+
+    test("should apply multiple validation rules as array in validationSet", async () => {
+
+        const customRule = new class CustomRule extends BaseRule {
+
+            protected error = 'The {field} field is invalid';
+
+            async validate() {
+                return true;
+            }
+
+            message(field: string, message: string) {
+                return {
+                    name: this.getName(),
+                    message: this.generateMessage({ field }, message)
+                }
+            }
+        }
+
+        const customRuleFail = new class CustomRuleFail extends BaseRule {
+
+            protected error = 'The {field} field must be different';
+
+            async validate() {
+                return true;
+            }
+
+            message(field: string, message: string) {
+                return {
+                    name: this.getName(),
+                    message: this.generateMessage({ field }, message)
+                }
+            }
+        }
+
+        const customValidationSet = new ValidationSet();
+        customValidationSet.add([customRule, customRuleFail]);
+        const middleware = new ValidationFactory().withValidationSet(customValidationSet).make(customValidation);
+
+        const req = { body: data.invalid.body };
+        const res = {};
+        const next = vi.spyOn(utils, 'next').mockImplementation(() => next)
+
+        await middleware(req, res, next);
+
+        expect(next).toHaveBeenCalled();
+        expect(next).not.toHaveBeenCalledWith(new ValidationError({}));
+    });
+
+    test("should throw a custom error if the validation fails", async () => {
+
+        const customValidationError = class CustomValidationError extends ValidationError {
+            constructor(errors: object) {
+                super(errors);
+                this.status = 400;
+            }
+        }
+
+
+        const factory = new ValidationFactory();
+        const middleware = factory.withValidationError(customValidationError).make(validation);
+        const req = { body: data.invalid.body };
+        const res = {};
+        const next = vi.spyOn(utils, 'next').mockImplementation(() => next)
+
+        await middleware(req, res, next);
+
+        expect(next).toHaveBeenCalled();
+        expect(next).toHaveBeenCalledWith(new ValidationError({}));
+        expect(next).toHaveBeenCalledWith(expect.objectContaining({ status: 400 }));
+    });
 })
