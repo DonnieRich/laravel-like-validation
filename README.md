@@ -52,7 +52,7 @@ const { ValidationFacade } = require('@ricciodev/laravel-like-validation');
 
 ## Basic
 
-You can validate the following request fields: body, query and params.
+You can validate the following request fields: `body`, `query` and `params`.
 For any of these fields you can specify the input you want to validate and the rules to apply.
 
 To apply the rules you can choose between `string` and `array` syntax:
