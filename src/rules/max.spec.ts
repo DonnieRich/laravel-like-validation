@@ -10,6 +10,10 @@ const mockRequestObject = {
     emptyArray: [],
     lowNumber: 455,
     highNumber: 1500,
+    floatNumber: 1500.5,
+    negativeNumber: -1500,
+    negativeFloatNumber: -1500.5,
+    zeroNumber: 0,
     emptyObject: {},
     symbol: Symbol("test"),
     nullValue: null,
@@ -17,76 +21,170 @@ const mockRequestObject = {
     fakeArray: { length: 4 },
 };
 
-describe("Max Rule", () => {
-    it("should validate strings within the max length", async () => {
-        const rule = new Max();
-        const result = await rule.validate(mockRequestObject, "shortString", "5");
-        expect(result).toBe(true);
+describe("Max", () => {
+
+    describe("String", () => {
+        it("should validate strings within the max length", async () => {
+            const rule = new Max();
+            const result = await rule.validate(mockRequestObject, "shortString", "5");
+            expect(result).toBe(true);
+        });
+
+        it("should invalidate strings exceeding the max length", async () => {
+            const rule = new Max();
+            const result = await rule.validate(mockRequestObject, "longString", "5");
+            expect(result).toBe(false);
+        });
     });
 
-    it("should invalidate strings exceeding the max length", async () => {
-        const rule = new Max();
-        const result = await rule.validate(mockRequestObject, "longString", "5");
-        expect(result).toBe(false);
+    describe("Array", () => {
+        it("should validate arrays within the max length", async () => {
+            const rule = new Max();
+            const result = await rule.validate(mockRequestObject, "shortArray", "3");
+            expect(result).toBe(true);
+        });
+
+        it("should invalidate arrays exceeding the max length", async () => {
+            const rule = new Max();
+            const result = await rule.validate(mockRequestObject, "longArray", "5");
+            expect(result).toBe(false);
+        });
+
+        it("should validate empty arrays", async () => {
+            const rule = new Max();
+            const result = await rule.validate(mockRequestObject, "emptyArray", "4");
+            expect(result).toBe(true);
+        });
+
+        it("should validate empty arrays with max as 0", async () => {
+            const rule = new Max();
+            const result = await rule.validate(mockRequestObject, "emptyArray", "0");
+            expect(result).toBe(true);
+        });
     });
 
-    it("should validate arrays within the max length", async () => {
-        const rule = new Max();
-        const result = await rule.validate(mockRequestObject, "shortArray", "3");
-        expect(result).toBe(true);
+    describe("Numeric", () => {
+        it("should validate numbers less than or equal to the max value", async () => {
+            const rule = new Max();
+            const result = await rule.validate(mockRequestObject, "lowNumber", "1000");
+            expect(result).toBe(true);
+        });
+
+        it("should invalidate numbers greater than the max value", async () => {
+            const rule = new Max();
+            const result = await rule.validate(mockRequestObject, "highNumber", "1000");
+            expect(result).toBe(false);
+        });
+
+        it("should validate float numbers less than or equal to the max value", async () => {
+            const rule = new Max();
+            const result = await rule.validate(mockRequestObject, "floatNumber", "2000");
+            expect(result).toBe(true);
+        });
+
+        it("should invalidate float numbers greater than the max value", async () => {
+            const rule = new Max();
+            const result = await rule.validate(mockRequestObject, "floatNumber", "1000");
+            expect(result).toBe(false);
+        });
+
+        it("should validate negative numbers less than or equal to the max value", async () => {
+            const rule = new Max();
+            const result = await rule.validate(mockRequestObject, "negativeNumber", "-1000");
+            expect(result).toBe(true);
+        });
+
+        it("should invalidate negative numbers greater than the max value", async () => {
+            const rule = new Max();
+            const result = await rule.validate(mockRequestObject, "negativeNumber", "-2000");
+            expect(result).toBe(false);
+        });
+
+        it("should validate negative float numbers less than or equal to the max value", async () => {
+            const rule = new Max();
+            const result = await rule.validate(mockRequestObject, "negativeFloatNumber", "-1000.5");
+            expect(result).toBe(true);
+        });
+
+        it("should invalidate negative float numbers greater than the max value", async () => {
+            const rule = new Max();
+            const result = await rule.validate(mockRequestObject, "negativeFloatNumber", "-2000.5");
+            expect(result).toBe(false);
+        });
+
+        it("should validate zero as less than or equal to the max value", async () => {
+            const rule = new Max();
+            const result = await rule.validate(mockRequestObject, "zeroNumber", "0");
+            expect(result).toBe(true);
+        });
+
+        it("should invalidate zero if the max value is negative", async () => {
+            const rule = new Max();
+            const result = await rule.validate(mockRequestObject, "zeroNumber", "-1");
+            expect(result).toBe(false);
+        });
     });
 
-    it("should invalidate arrays exceeding the max length", async () => {
-        const rule = new Max();
-        const result = await rule.validate(mockRequestObject, "longArray", "5");
-        expect(result).toBe(false);
+    describe("Non-array, non-string and non-numeric", () => {
+        it("should invalidate objects that are not arrays or strings", async () => {
+            const rule = new Max();
+            const result = await rule.validate(mockRequestObject, "emptyObject", "5");
+            expect(result).toBe(false);
+        });
+
+        it("should invalidate symbols", async () => {
+            const rule = new Max();
+            const result = await rule.validate(mockRequestObject, "symbol", "5");
+            expect(result).toBe(false);
+        });
+
+        it("should invalidate null values", async () => {
+            const rule = new Max();
+            const result = await rule.validate(mockRequestObject, "nullValue", "5");
+            expect(result).toBe(false);
+        });
+
+        it("should invalidate functions", async () => {
+            const rule = new Max();
+            const result = await rule.validate(mockRequestObject, "functionValue", "5");
+            expect(result).toBe(false);
+        });
+
+        it("should invalidate objects", async () => {
+            const rule = new Max();
+            const result = await rule.validate(mockRequestObject, "fakeArray", "5");
+            expect(result).toBe(false);
+        });
     });
 
-    it("should validate numbers less than or equal to the max value", async () => {
-        const rule = new Max();
-        const result = await rule.validate(mockRequestObject, "lowNumber", "1000");
-        expect(result).toBe(true);
+    describe("Generic", () => {
+        it("Should return an object in case of fail", () => {
+            const max = new Max();
+            const result = max.message("shortString", "", "5");
+
+            expect(result).toEqual({ name: "max", message: "The shortString must have a max length of 5" });
+        });
+
+        it("Should return a custom error message", () => {
+            const max = new Max();
+            const result = max.message("shortString", "Please, ensure the {field} field does not exceed {value} characters", "5");
+
+            expect(result.message).toEqual("Please, ensure the shortString field does not exceed 5 characters");
+        });
+
+        it("Should have a default error message", () => {
+            const max = new Max();
+            const error = max.getError();
+
+            expect(error).toBe("The {field} must have a max length of {value}");
+        });
+
+        it("Should return a normalized classname", () => {
+            const max = new Max();
+            const name = max.getName();
+
+            expect(name).toBe("max");
+        });
     });
 
-    it("should invalidate numbers greater than the max value", async () => {
-        const rule = new Max();
-        const result = await rule.validate(mockRequestObject, "highNumber", "1000");
-        expect(result).toBe(false);
-    });
-
-    it("should validate empty arrays", async () => {
-        const rule = new Max();
-        const result = await rule.validate(mockRequestObject, "emptyArray", "0");
-        expect(result).toBe(true);
-    });
-
-    it("should invalidate objects that are not arrays or strings", async () => {
-        const rule = new Max();
-        const result = await rule.validate(mockRequestObject, "emptyObject", "5");
-        expect(result).toBe(false);
-    });
-
-    it("should invalidate symbols", async () => {
-        const rule = new Max();
-        const result = await rule.validate(mockRequestObject, "symbol", "5");
-        expect(result).toBe(false);
-    });
-
-    it("should invalidate null values", async () => {
-        const rule = new Max();
-        const result = await rule.validate(mockRequestObject, "nullValue", "5");
-        expect(result).toBe(false);
-    });
-
-    it("should invalidate functions", async () => {
-        const rule = new Max();
-        const result = await rule.validate(mockRequestObject, "functionValue", "5");
-        expect(result).toBe(false);
-    });
-
-    it("should invalidate objects", async () => {
-        const rule = new Max();
-        const result = await rule.validate(mockRequestObject, "fakeArray", "5");
-        expect(result).toBe(false);
-    });
 });
