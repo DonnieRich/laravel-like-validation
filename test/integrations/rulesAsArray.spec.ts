@@ -50,6 +50,13 @@ const data = {
             tags: ["tag1", "tag3"],
             terms: true
         }
+    },
+    invalidForTagsAndTerms: {
+        body: {
+            title: "Hello World",
+            content: "This is a test",
+            terms: true
+        }
     }
 }
 
@@ -84,10 +91,34 @@ describe("Custom Rules", () => {
                             tags: ["tag1", "tag2"]
                         }
                     }
-
                 }
             }
         })
+    });
+
+    test("should return the error if field is not present", async () => {
+        const middleware = ValidationFacade.make(validation);
+        const req = { body: data.invalidForTagsAndTerms.body };
+        const res = {};
+        const next = vi.spyOn(utils, 'next').mockImplementation(() => next)
+
+        await middleware(req, res, next);
+
+        expect(next).toHaveBeenCalledWith(new ValidationError({}));
+        expect(next).toHaveBeenCalledWith(expect.objectContaining({ status: 422 }));
+        expect(next).toHaveBeenCalledWith(expect.objectContaining({
+
+            errors: {
+                body: {
+                    tags: {
+                        present_if: "The tags field must be present if the field terms has a value of true",
+                        is_array: 'The tags field must be an array'
+                    }
+                }
+            }
+
+        }))
+
     });
 
     // test("should return the error for malformed data", async () => {

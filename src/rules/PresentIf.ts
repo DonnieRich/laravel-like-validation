@@ -4,7 +4,7 @@ class PresentIf extends BaseRule {
     error = "The {field} field must be present if the field {anotherField} has a value of {anotherValue}"
 
     async validate(data: { [s: string]: any }, field: string, value: any): Promise<boolean> {
-        const [anotherField, anotherValue] = !Array.isArray(value) && value.includes(",") ? this.parseValue(value) : value;
+        const [anotherField, anotherValue] = !Array.isArray(value) ? this.parseValue(value) : value;
 
         if (this.checkForUndefined(data, anotherField)) {
             return false;
@@ -55,7 +55,7 @@ class PresentIf extends BaseRule {
     }
 
     message(field: string, message: string = '', value: Array<any>): { name: string, message: string } {
-        const [anotherField, anotherValue] = value;
+        const [anotherField, anotherValue] = !Array.isArray(value) ? this.parseValue(value) : value;
         return {
             name: this.getName(),
             message: this.generateMessage({ field, anotherField, anotherValue }, message)
