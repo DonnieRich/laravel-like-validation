@@ -25,23 +25,23 @@ describe("PresentIf", () => {
         it("Should pass validation when the condition is met", async () => {
             const presentIf = new PresentIf();
 
-            const result = await presentIf.validate(mockRequestObject, "field", ["shortString", "ab"]);
+            const result = await presentIf.validate(mockRequestObject, "field", "shortString,ab");
 
             expect(result).toBe(true);
         });
 
-        it("Should fail validation when the condition is not met", async () => {
+        it("Should pass validation when the condition is not met and the field is present", async () => {
             const presentIf = new PresentIf();
 
-            const result = await presentIf.validate(mockRequestObject, "field", ["shortString", "xyz"]);
+            const result = await presentIf.validate(mockRequestObject, "field", "shortString,xyz");
 
-            expect(result).toEqual(false);
+            expect(result).toEqual(true);
         });
 
         it("Should pass validation when the field is present and condition is met", async () => {
             const presentIf = new PresentIf();
 
-            const result = await presentIf.validate(mockRequestObject, "field", ["shortString", "ab"]);
+            const result = await presentIf.validate(mockRequestObject, "field", "shortString,ab");
 
             expect(result).toBe(true);
         });
@@ -49,23 +49,31 @@ describe("PresentIf", () => {
         it("Should fail validation when the field is missing and condition is met", async () => {
             const presentIf = new PresentIf();
 
-            const result = await presentIf.validate(mockRequestObject, "missingField", ["shortString", "ab"]);
+            const result = await presentIf.validate(mockRequestObject, "missingField", "shortString,ab");
 
             expect(result).toEqual(false);
         });
 
-        it("Should fail validation when the condition field does not exist", async () => {
+        it("Should pass validation when the condition field does not exist", async () => {
             const presentIf = new PresentIf();
 
-            const result = await presentIf.validate(mockRequestObject, "field", ["nonExistentField", "value"]);
+            const result = await presentIf.validate(mockRequestObject, "field", "nonExistentField,value");
 
-            expect(result).toBe(false);
+            expect(result).toBe(true);
         });
 
         it("Should handle numeric conditions correctly", async () => {
             const presentIf = new PresentIf();
 
-            const result = await presentIf.validate(mockRequestObject, "field", ["lowNumber", "455"]);
+            const result = await presentIf.validate(mockRequestObject, "field", "lowNumber,455");
+
+            expect(result).toBe(true);
+        });
+
+        it("Should pass validation for numeric conditions when value does not match", async () => {
+            const presentIf = new PresentIf();
+
+            const result = await presentIf.validate(mockRequestObject, "field", "lowNumber,999");
 
             expect(result).toBe(true);
         });
@@ -73,49 +81,71 @@ describe("PresentIf", () => {
         it("Should fail validation for numeric conditions when value does not match", async () => {
             const presentIf = new PresentIf();
 
-            const result = await presentIf.validate(mockRequestObject, "field", ["lowNumber", "999"]);
+            const result = await presentIf.validate(mockRequestObject, "missingField", "lowNumber,999");
+
+            expect(result).toBe(true);
+        });
+
+        it("Should handle fluent conditions correctly - validation is passing", async () => {
+            const presentIf = new PresentIf();
+
+            presentIf.field("shortArray").value([1, 2]);
+
+            const result = await presentIf.validate(mockRequestObject, "field");
+
+            expect(result).toBe(true);
+        });
+
+        it("Should handle fluent conditions correctly - validation is failing", async () => {
+            const presentIf = new PresentIf();
+
+            presentIf.field("shortArray").value([1, 2]);
+
+            const result = await presentIf.validate(mockRequestObject, "missingField");
 
             expect(result).toBe(false);
         });
 
-        it("Should handle array conditions correctly", async () => {
+        it("Should return false if value is not passed", async () => {
             const presentIf = new PresentIf();
 
-            const result = await presentIf.validate(mockRequestObject, "field", ["shortArray", [1, 2]]);
+            presentIf.field("shortArray");
+
+            const result = await presentIf.validate(mockRequestObject, "field");
 
             expect(result).toBe(true);
         });
 
-        it("Should handle array passed as string conditions correctly", async () => {
+        it("Should return true if field is not passed", async () => {
             const presentIf = new PresentIf();
 
-            const result = await presentIf.validate(mockRequestObject, "field", ["shortArray", "[1,2]"]);
+            const result = await presentIf.validate(mockRequestObject, "field");
 
             expect(result).toBe(true);
         });
 
-        it("Should fail validation for array conditions when value does not match", async () => {
+        it("Should pass validation for array conditions when value does not match and field is missing", async () => {
             const presentIf = new PresentIf();
 
-            const result = await presentIf.validate(mockRequestObject, "field", ["shortArray", [3, 4]]);
+            const result = await presentIf.validate(mockRequestObject, "missingField", "shortArray,[3,4]");
 
-            expect(result).toEqual(false);
+            expect(result).toEqual(true);
         });
 
         it("Should handle boolean conditions correctly", async () => {
             const presentIf = new PresentIf();
 
-            const result = await presentIf.validate(mockRequestObject, "field", ["booleanField", true]);
+            const result = await presentIf.validate(mockRequestObject, "field", "booleanField,true");
 
             expect(result).toBe(true);
         });
 
-        it("Should fail validation for boolean conditions when value does not match", async () => {
+        it("Should pass validation for boolean conditions when value does not match", async () => {
             const presentIf = new PresentIf();
 
-            const result = await presentIf.validate(mockRequestObject, "field", ["booleanFieldFalse", true]);
+            const result = await presentIf.validate(mockRequestObject, "field", "booleanFieldFalse,true");
 
-            expect(result).toBe(false);
+            expect(result).toBe(true);
         });
     });
 
@@ -124,7 +154,7 @@ describe("PresentIf", () => {
         it("Should return an object in case of fail", () => {
             const presentIf = new PresentIf();
 
-            const result = presentIf.message("field", "", ["fieldToCheck", "valueToCheck"]);
+            const result = presentIf.message("field", "", "fieldToCheck,valueToCheck");
 
             expect(result).toEqual({ name: "present_if", message: "The field field must be present if the field fieldToCheck has a value of valueToCheck" });
         });
@@ -132,7 +162,7 @@ describe("PresentIf", () => {
         it("Should return a custom error message", () => {
             const presentIf = new PresentIf();
 
-            const result = presentIf.message("field", "{field} must be present when {anotherField} is {anotherValue}", ["fieldToCheck", "valueToCheck"]);
+            const result = presentIf.message("field", "{field} must be present when {fieldToCheck} is {valueToCheck}", "fieldToCheck,valueToCheck");
 
             expect(result.message).toBe("field must be present when fieldToCheck is valueToCheck");
         });
@@ -142,7 +172,7 @@ describe("PresentIf", () => {
 
             const error = presentIf.getError();
 
-            expect(error).toBe("The {field} field must be present if the field {anotherField} has a value of {anotherValue}");
+            expect(error).toBe("The {field} field must be present if the field {fieldToCheck} has a value of {valueToCheck}");
         });
 
         it("Should return a normalized classname", () => {
