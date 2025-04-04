@@ -19,6 +19,16 @@ const malformedRulesInArray = {
     }
 }
 
+const malformedRulesInArrayWithCallback = {
+    body: {
+        title: 'required',
+        content: [(data, key) => {
+            // do something without returning a value
+        }]
+    }
+}
+
+
 const emptyRulesArray = {
     body: {
         title: []
@@ -109,5 +119,25 @@ describe("Errors", () => {
         expect(next).toHaveBeenCalled();
         expect(next).not.toHaveBeenCalledWith(expect.objectContaining({ status: 422 }));
         expect(req).toHaveProperty('locals');
+    });
+
+    test("should throw an error if the callback validation rule doesn't return a value", async () => {
+        const middleware = ValidationFacade.make(malformedRulesInArrayWithCallback);
+        const req = { body: data.valid.body };
+        const res = {};
+        const next = vi.spyOn(utils, 'next').mockImplementation(() => next)
+
+        await middleware(req, res, next);
+
+        expect(next).toHaveBeenCalledWith(expect.objectContaining({ status: 422 }));
+        expect(next).toHaveBeenCalledWith(expect.objectContaining({
+            errors: {
+                body: {
+                    content: {
+                        "invalid-callback": "The user provided callback didn\'t provided a valid return value. Array needed.",
+                    }
+                }
+            }
+        }));
     });
 });

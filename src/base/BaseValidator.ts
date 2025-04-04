@@ -225,18 +225,30 @@ abstract class BaseValidator implements IValidator {
                     reject({ [this.currentValidationKey]: { [key]: error } });
 
                 } else if (v.isCustomFunction) {
-                    const [result, error] = await v.callValidation();
 
-                    if (!result) {
-                        reject({ [this.currentValidationKey]: { [key]: error } });
+                    const result = await v.callValidation();
+
+                    if (typeof result === 'undefined' || !Array.isArray(result)) {
+
+                        reject({ [this.currentValidationKey]: { [key]: { name: 'invalid-callback', message: 'The user provided callback didn\'t provided a valid return value. Array needed.' } } });
+
+                    } else {
+
+                        const [isValid, error] = result;
+
+                        if (!isValid) {
+                            reject({ [this.currentValidationKey]: { [key]: error } });
+                        }
+
                     }
 
+
                 } else {
+
                     const result = await v.callValidation();
 
                     if (!result) {
 
-                        // lastValidationFailed = true;
                         const error = v.callMessage();
                         reject({ [this.currentValidationKey]: { [key]: error } });
 
