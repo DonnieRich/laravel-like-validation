@@ -1,8 +1,7 @@
-/// <reference types="express" />
 import type { IValidationHandler } from "./contracts/IValidationHandler.js";
 import ValidationError from "./errors/ValidationError.js";
 import type { IValidator } from "./contracts/IValidator.js";
-import type { Request, Response } from "express";
+import { type Request } from "./types/Request.js";
 class ValidationHandler implements IValidationHandler {
 
     private validator: IValidator;
