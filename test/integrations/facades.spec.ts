@@ -2,6 +2,7 @@ import { describe, expect, test, vi } from "vitest";
 import ValidationFacade from '../../src/facades/Validation';
 import ValidationError from "../../src/errors/ValidationError";
 import { afterEach } from "node:test";
+import Rule from "../../src/facades/Rule";
 
 const validation = {
     body: {
@@ -10,6 +11,14 @@ const validation = {
         tags: 'is_array'
     }
 };
+
+const validationWithRuleFacade = {
+    body: {
+        title: ['required', Rule.between().min(5).max(15)],
+        content: [Rule.present_if().field('confirm').value(true)],
+        confirm: 'boolean'
+    }
+}
 
 const data = {
     valid: {
@@ -24,6 +33,19 @@ const data = {
             title: "",
             content: "Short",
             tags: "not an array"
+        }
+    },
+    forRuleFacadeValid: {
+        body: {
+            title: "Hello World",
+            content: "This is a test",
+            confirm: true
+        }
+    },
+    forRuleFacadeInvalid: {
+        body: {
+            title: "Hel",
+            confirm: true
         }
     }
 }
@@ -182,6 +204,58 @@ describe("ValidationFacade", () => {
                 }
             }
         }));
+    });
+
+    test("should throw an error if the validation fails (Rule Facade)", async () => {
+        const middleware = ValidationFacade.make(validationWithRuleFacade);
+        const req = { body: data.forRuleFacadeInvalid.body };
+        const res = {};
+        const next = vi.spyOn(utils, 'next').mockImplementation(() => next)
+
+        await middleware(req, res, next);
+
+        expect(next).toHaveBeenCalled();
+        expect(next).toHaveBeenCalledWith(new ValidationError({}));
+        expect(next).toHaveBeenCalledWith(expect.objectContaining({ status: 422 }));
+        expect(next).toHaveBeenCalledWith(expect.objectContaining({
+            errors: {
+                body: {
+                    title: {
+                        between: "The title field must be between 5 and 15",
+                    },
+                    content: {
+                        present_if: "The content field must be present if the field confirm has a value of true",
+                    }
+                }
+            }
+        }));
+    });
+
+    test("should pass the validated values inside req.locals if the validation passes", async () => {
+        const middleware = ValidationFacade.make(validationWithRuleFacade);
+        const req = { body: data.forRuleFacadeValid.body };
+        const res = {};
+        const next = vi.spyOn(utils, 'next').mockImplementation(() => next)
+
+        await middleware(req, res, next);
+
+        expect(next).not.toHaveBeenCalledWith(new ValidationError({}));
+        expect(req).toHaveProperty('locals');
+        expect(req).toMatchObject({
+            locals: {
+                result: {
+                    errors: {},
+                    validated: {
+                        body: {
+                            title: "Hello World",
+                            content: "This is a test",
+                            confirm: true
+                        }
+                    }
+
+                }
+            }
+        })
     });
 
 });
