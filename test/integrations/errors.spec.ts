@@ -28,6 +28,16 @@ const malformedRulesInArrayWithCallback = {
     }
 }
 
+const malformedRulesInArrayWithCallbackReturingWrongValue = {
+    body: {
+        title: 'required',
+        content: [(data, key) => {
+            // do something and return a wrong value
+            return "gino"
+        }]
+    }
+}
+
 
 const emptyRulesArray = {
     body: {
@@ -123,6 +133,26 @@ describe("Errors", () => {
 
     test("should throw an error if the callback validation rule doesn't return a value", async () => {
         const middleware = ValidationFacade.make(malformedRulesInArrayWithCallback);
+        const req = { body: data.valid.body };
+        const res = {};
+        const next = vi.spyOn(utils, 'next').mockImplementation(() => next)
+
+        await middleware(req, res, next);
+
+        expect(next).toHaveBeenCalledWith(expect.objectContaining({ status: 422 }));
+        expect(next).toHaveBeenCalledWith(expect.objectContaining({
+            errors: {
+                body: {
+                    content: {
+                        "invalid-callback": "The user provided callback didn\'t provided a valid return value. Array needed.",
+                    }
+                }
+            }
+        }));
+    });
+
+    test("should throw an error if the callback validation rule doesn't return a value", async () => {
+        const middleware = ValidationFacade.make(malformedRulesInArrayWithCallbackReturingWrongValue);
         const req = { body: data.valid.body };
         const res = {};
         const next = vi.spyOn(utils, 'next').mockImplementation(() => next)
