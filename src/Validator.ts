@@ -12,8 +12,8 @@ class Validator extends BaseValidator {
         this.validationSet = validationSet;
     }
 
-    public async validate(req: IValidationRequest, fail: (error: object, validated: object) => void): Promise<void> {
-        this.fail = fail;
+    public async validate(req: IValidationRequest, fail: (error: object, validated: object) => void): Promise<[object, object]> { //Promise<void> {
+        // this.fail = fail;
 
         this.beforeValidate();
 
@@ -23,7 +23,12 @@ class Validator extends BaseValidator {
 
         this.afterValidate();
 
-        this.fail(this.getValidationErrors(), this.getValidatedData());
+        return [
+            this.getValidationErrors(),
+            this.getValidatedData()
+        ]
+
+        // this.fail(this.getValidationErrors(), this.getValidatedData());
     }
 }
 

@@ -6,9 +6,11 @@ import type { IParsedRule } from "../contracts/IParsedRule.js";
 import type { Result } from "../types/Result.js";
 import type BaseValidation from "./BaseValidation.js";
 import type { ErrorKeys, ErrorKeysType, ErrorPartialKeys, ValidatedKeys, ValidatedKeysType, ValidatedPartialKeys } from "../types/ValidationKeys.js";
+import type { IValidator } from "../contracts/IValidator.js";
+import type { ParsedRule } from "../types/ParsedRule.js";
 
 
-abstract class BaseValidator {
+abstract class BaseValidator implements IValidator {
     protected validationSet!: IValidationSet;
     protected validation!: BaseValidation;
 
@@ -48,6 +50,7 @@ abstract class BaseValidator {
 
     private foundInvalidRule: boolean = false;
     private invalidRuleMessage: string = "";
+    private invalidRule: string = "";
 
     private reset(): void {
         this.data = {};
@@ -71,6 +74,7 @@ abstract class BaseValidator {
         this.currentValidationKey = 'body';
 
         this.foundInvalidRule = false;
+        this.invalidRule = "";
         this.invalidRuleMessage = "";
     }
 
@@ -140,65 +144,121 @@ abstract class BaseValidator {
         this.validated[this.currentValidationKey]![key] = value;
     }
 
-    private getRule(rule: string | Function | BaseRule | [BaseRule, any], key: string): IParsedRule {
+    private getRule(rule: string | Function | BaseRule, key: string): ParsedRule {
+
         const field = this.customAttributes[key] ?? key;
-
-        const result: IParsedRule = {
-            rule: null,
-            callValidation: async () => false,
-            callMessage: null
-        }
-
         const validations = this.validationSet.getRules();
 
-        if (typeof rule === 'string') {
+        if (typeof rule === 'function') {
 
-            if (rule.match(/[a-z]+:.+/)) {
-                const [ruleKey, value] = this.validationSet.matchRule(rule);
-                const message = this.customMessages[`${key}.${ruleKey}`] ?? this.customMessages[ruleKey];
-                result.rule = validations[ruleKey].getName();
-                result.callValidation = async () => await validations[ruleKey].validate(this.data, key, value);
-                result.callMessage = () => validations[ruleKey].message(field, message, value);
-            } else if (validations[rule]) {
-                const message = this.customMessages[`${key}.${rule}`] ?? this.customMessages[rule];
-                result.rule = validations[rule].getName();
-                result.callValidation = async () => await validations[rule].validate(this.data, key);
-                result.callMessage = () => validations[rule].message(field, message);
+            const result: ParsedRule = {
+                rule: "function",
+                callValidation: async () => await rule(this.data, key),
+                isCustomFunction: true
             }
-        }
 
-        if (rule instanceof BaseRule) {
-            const message = this.customMessages[`${key}.${rule.getName()}`] ?? this.customMessages[rule.getName()];
-            result.rule = rule.getName();
-            result.callValidation = async () => await rule.validate(this.data, key);
-            result.callMessage = () => rule.message(field, message);
-        } else if (typeof rule === 'function') {
-            result.rule = typeof rule;
-            result.callValidation = async () => await rule(this.data, { key, current: this.currentValidationKey }, this.fail);
-            result.callMessage = null;
-        }
+            return result;
 
-        if (Array.isArray(rule)) {
-            if (rule[0] instanceof BaseRule) {
-                const values = rule.slice(1);
-                const message = this.customMessages[`${key}.${rule[0].getName()}`] ?? this.customMessages[rule[0].getName()];
-                result.rule = rule[0].getName();
-                result.callValidation = async () => await rule[0].validate(this.data, key, values);
-                result.callMessage = () => rule[0].message(field, message, values);
+        } else if (rule instanceof BaseRule || typeof rule === 'string') {
+
+            const result: ParsedRule = {
+                rule: null,
+                callValidation: async () => false,
+                callMessage: () => ({ name: rule as string, message: `Invalid rule ${rule} applied to ${key}` }),
+                isCustomFunction: false
             }
-        }
 
-        if (result.rule === null) {
+            if (rule instanceof BaseRule) {
+
+                const message = this.customMessages[`${key}.${rule.getName()}`] ?? this.customMessages[rule.getName()];
+                result.rule = rule.getName();
+                result.callValidation = async () => await rule.validate(this.data, key);
+                result.callMessage = () => rule.message(field, message);
+
+            } else if (typeof rule === 'string') {
+
+                if (rule.match(/[a-z]+:.+/)) {
+
+                    const [ruleKey, value] = this.validationSet.matchRule(rule);
+                    const message = this.customMessages[`${key}.${ruleKey}`] ?? this.customMessages[ruleKey];
+                    result.rule = validations[ruleKey].getName();
+                    result.callValidation = async () => await validations[ruleKey].validate(this.data, key, value);
+                    result.callMessage = () => validations[ruleKey].message(field, message, value);
+
+                } else if (validations[rule]) {
+
+                    const message = this.customMessages[`${key}.${rule}`] ?? this.customMessages[rule];
+                    result.rule = validations[rule].getName();
+                    result.callValidation = async () => await validations[rule].validate(this.data, key);
+                    result.callMessage = () => validations[rule].message(field, message);
+
+                }
+
+            }
+
+            return result;
+
+        } else {
             this.foundInvalidRule = true;
-            this.invalidRuleMessage = `Invalid rule ${rule} applied to ${key}`;
+
+            return {
+                rule: null,
+                callValidation: async () => false,
+                callMessage: () => ({ name: rule as string, message: `Invalid rule ${rule} applied to ${key}` }),
+                isCustomFunction: false
+            };
         }
 
-        return result;
+        // if (typeof rule === 'string') {
+
+        //     if (rule.match(/[a-z]+:.+/)) {
+        //         const [ruleKey, value] = this.validationSet.matchRule(rule);
+        //         const message = this.customMessages[`${key}.${ruleKey}`] ?? this.customMessages[ruleKey];
+        //         result.rule = validations[ruleKey].getName();
+        //         result.callValidation = async () => await validations[ruleKey].validate(this.data, key, value);
+        //         result.callMessage = () => validations[ruleKey].message(field, message, value);
+        //     } else if (validations[rule]) {
+        //         const message = this.customMessages[`${key}.${rule}`] ?? this.customMessages[rule];
+        //         result.rule = validations[rule].getName();
+        //         result.callValidation = async () => await validations[rule].validate(this.data, key);
+        //         result.callMessage = () => validations[rule].message(field, message);
+        //     }
+        // }
+
+        // if (rule instanceof BaseRule) {
+        //     const message = this.customMessages[`${key}.${rule.getName()}`] ?? this.customMessages[rule.getName()];
+        //     result.rule = rule.getName();
+        //     result.callValidation = async () => await rule.validate(this.data, key);
+        //     result.callMessage = () => rule.message(field, message);
+        // } else if (typeof rule === 'function') {
+        //     result.rule = "function";
+        //     result.isCustomFunction = true;
+        //     result.callValidation = async () => await rule(this.data, { key, current: this.currentValidationKey });
+        //     result.callMessage = null;
+        // }
+
+        // TODO: remove this?
+        // if (Array.isArray(rule)) {
+        //     if (rule[0] instanceof BaseRule) {
+        //         const values = rule.slice(1);
+        //         const message = this.customMessages[`${key}.${rule[0].getName()}`] ?? this.customMessages[rule[0].getName()];
+        //         result.rule = rule[0].getName();
+        //         result.callValidation = async () => await rule[0].validate(this.data, key, values);
+        //         result.callMessage = () => rule[0].message(field, message, values);
+        //     }
+        // }
+
+        // if (result.rule === null) {
+        //     this.foundInvalidRule = true;
+        //     this.invalidRuleMessage = `Invalid rule ${rule} applied to ${key}`;
+        // }
+
+        // return result;
     }
 
-    private mapRulesToPromises(rules: (string | Function | BaseRule | [BaseRule, any])[], key: string): Promise<object>[] {
+    private mapRulesToPromises(rules: (string | Function | BaseRule)[], key: string): Promise<object>[] {
 
-        let lastValidationFailed = false;
+        // let lastValidationFailed = false;
 
         const promises = rules.map(async rule => {
 
@@ -206,16 +266,27 @@ abstract class BaseValidator {
 
             return await new Promise<object>(async (resolve, reject) => {
 
-                const validationResult = await v.callValidation();
+                if (v.rule === null) {
 
-                if (!validationResult) {
+                    const error = v.callMessage();
+                    reject({ [this.currentValidationKey]: { [key]: error } });
 
-                    lastValidationFailed = true;
+                } else if (v.isCustomFunction) {
+                    const [result, error] = await v.callValidation();
 
-                    if (v.callMessage) {
-                        const error = v.callMessage();
-
+                    if (!result) {
                         reject({ [this.currentValidationKey]: { [key]: error } });
+                    }
+
+                } else {
+                    const result = await v.callValidation();
+
+                    if (!result) {
+
+                        // lastValidationFailed = true;
+                        const error = v.callMessage();
+                        reject({ [this.currentValidationKey]: { [key]: error } });
+
                     }
                 }
 
@@ -333,7 +404,7 @@ abstract class BaseValidator {
 
     abstract setValidation(validation: BaseValidation): void;
     abstract setValidationSet(validationSet: IValidationSet): void;
-    abstract validate(req: IValidationRequest, fail: (error: object, validated: object) => void): Promise<void>;
+    abstract validate(req: IValidationRequest, fail: (error: object, validated: object) => void): Promise<[object, object]> //Promise<void>;
 
 }
 

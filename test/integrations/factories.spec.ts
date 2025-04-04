@@ -184,8 +184,16 @@ describe("ValidationFactory", () => {
 
         await middleware(req, res, next);
 
-        expect(next).toHaveBeenCalledWith({ status: 500, errors: "Invalid rule invalidRule applied to title" });
-
+        expect(next).toHaveBeenCalledWith(expect.objectContaining({ status: 422 }));
+        expect(next).toHaveBeenCalledWith(expect.objectContaining({
+            errors: {
+                body: {
+                    title: {
+                        invalidRule: "Invalid rule invalidRule applied to title",
+                    }
+                }
+            }
+        }));
     });
 
     test("should apply custom validationSet", async () => {
@@ -318,7 +326,7 @@ describe("ValidationFactory", () => {
         expect(next).not.toHaveBeenCalledWith(new ValidationError({}));
     });
 
-    test("should throw a custom error if the validation fails", async () => {
+    test("should use a custom error if the validation fails", async () => {
 
         const customValidationError = class CustomValidationError extends ValidationError {
             constructor(errors: object) {

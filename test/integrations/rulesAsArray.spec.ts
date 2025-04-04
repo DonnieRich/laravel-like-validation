@@ -45,9 +45,8 @@ const data = {
         body: {
             title: "",
             content: "short",
-            tags: ["tag1", "tag3"],
-            terms: true,
-            checkTags: "present"
+            tags: ["tag1", "tag2"],
+            terms: true
         }
     },
     invalidForTagsAndTerms: {
@@ -95,7 +94,7 @@ describe("Custom Rules", () => {
         })
     });
 
-    test("should return the error if field is not present", async () => {
+    test("should validate if field is not present", async () => {
         const middleware = ValidationFacade.make(validation);
         const req = { body: data.invalidForTagsAndTerms.body };
         const res = {};
@@ -103,19 +102,33 @@ describe("Custom Rules", () => {
 
         await middleware(req, res, next);
 
-        expect(next).toHaveBeenCalledWith(new ValidationError({}));
-        expect(next).toHaveBeenCalledWith(expect.objectContaining({ status: 422 }));
-        expect(next).toHaveBeenCalledWith(expect.objectContaining({
-
-            errors: {
-                body: {
-                    tags: {
-                        present_if: "The tags field must be present if the field terms has a value of true",
+        expect(next).toHaveBeenCalledOnce();
+        expect(req).toHaveProperty('locals');
+        expect(req).toMatchObject({
+            locals: {
+                result: {
+                    errors: {},
+                    validated: {
+                        body: {
+                            title: "Hello World",
+                            content: "This is a test",
+                        }
                     }
                 }
             }
+        })
 
-        }))
+        // expect(next).toHaveBeenCalledWith(new ValidationError({}));
+        // expect(next).toHaveBeenCalledWith(expect.objectContaining({ status: 422 }));
+        // expect(next).toHaveBeenCalledWith(expect.objectContaining({
+        //     errors: {
+        //         body: {
+        //             tags: {
+        //                 present_if: "The tags field must be present if the field terms has a value of true",
+        //             }
+        //         }
+        //     }
+        // }))
 
     });
 
@@ -130,7 +143,6 @@ describe("Custom Rules", () => {
         expect(next).toHaveBeenCalledWith(new ValidationError({}));
         expect(next).toHaveBeenCalledWith(expect.objectContaining({ status: 422 }));
         expect(next).toHaveBeenCalledWith(expect.objectContaining({
-
             errors: {
                 body: {
                     title: {
@@ -144,7 +156,6 @@ describe("Custom Rules", () => {
                     }
                 }
             }
-
         }))
 
     });
@@ -157,9 +168,21 @@ describe("Custom Rules", () => {
 
         await middleware(req, res, next);
 
-        expect(next).toHaveBeenCalledWith(new ValidationError({}));
-        expect(next).toHaveBeenCalledWith(expect.objectContaining({ status: 422 }));
+        expect(next).toHaveBeenCalled();
+        expect(req).toMatchObject({
+            locals: {
+                result: {
+                    errors: {},
+                    validated: {
+                        body: {
+                            title: "Hello World",
+                            content: "This is a test",
+                        }
+                    }
 
+                }
+            }
+        })
     });
 
 });

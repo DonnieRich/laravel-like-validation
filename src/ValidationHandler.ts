@@ -3,7 +3,6 @@ import type { IValidationHandler } from "./contracts/IValidationHandler.js";
 import ValidationError from "./errors/ValidationError.js";
 import type { IValidator } from "./contracts/IValidator.js";
 import type { Request, Response } from "express";
-
 class ValidationHandler implements IValidationHandler {
 
     private validator: IValidator;
@@ -44,20 +43,18 @@ class ValidationHandler implements IValidationHandler {
 
     private async validationMiddleware(req: Request, res: Response, next: Function): Promise<void> {
 
-        let result: { status: number, errors: object, validated: object } = {
-            status: 422,
-            errors: {},
-            validated: {}
-        };
-
         try {
 
-            await this.validator.validate(req, (error: object, validated: object) => {
+            let result: { status: number, errors: object, validated: object } = {
+                status: 422,
+                errors: {},
+                validated: {}
+            };
 
-                result.errors = this.mergeErrors(error, result.errors);
-                result.validated = this.mergeValidated(validated, result.validated)
+            const [errors, validated] = await this.validator.validate(req, () => { });
 
-            })
+            result.errors = this.mergeErrors(errors, result.errors);
+            result.validated = this.mergeValidated(validated, result.validated)
 
             if (Object.keys(result.errors).length > 0 && this.throwOnError) {
                 throw new this.validationError(result.errors);
