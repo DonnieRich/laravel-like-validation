@@ -1,5 +1,4 @@
 import type BaseValidation from "./base/BaseValidation.js";
-import type { IValidationRequest } from "./contracts/IValidationRequest.js";
 import type { IValidationSet } from "./contracts/IValidationSet.js";
 import BaseValidator from "./base/BaseValidator.js";
 import type { Request } from "express";
