@@ -51,7 +51,7 @@ class ValidationHandler implements IValidationHandler {
                 validated: {}
             };
 
-            const [errors, validated] = await this.validator.validate(req, () => { });
+            const [errors, validated] = await this.validator.validate(req);
 
             result.errors = this.mergeErrors(errors, result.errors);
             result.validated = this.mergeValidated(validated, result.validated)

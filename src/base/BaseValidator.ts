@@ -359,7 +359,7 @@ abstract class BaseValidator implements IValidator {
 
     abstract setValidation(validation: BaseValidation): void;
     abstract setValidationSet(validationSet: IValidationSet): void;
-    abstract validate(req: IValidationRequest, fail: (error: object, validated: object) => void): Promise<[object, object]> //Promise<void>;
+    abstract validate(req: IValidationRequest): Promise<[object, object]>;
 
 }
 
