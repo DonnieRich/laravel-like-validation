@@ -23,30 +23,30 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">90.9% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>20/22</span>
+                <span class='fraction'>22/22</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
                 <span class="strong">100% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>10/10</span>
+                <span class='fraction'>11/11</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">83.33% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>5/6</span>
+                <span class='fraction'>6/6</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">90.9% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>20/22</span>
+                <span class='fraction'>22/22</span>
             </div>
         
             
@@ -93,34 +93,34 @@
 <a name='L28'></a><a href='#L28'>28</a>
 <a name='L29'></a><a href='#L29'>29</a>
 <a name='L30'></a><a href='#L30'>30</a>
-<a name='L31'></a><a href='#L31'>31</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">206x</span>
-<span class="cline-any cline-yes">206x</span>
+<a name='L31'></a><a href='#L31'>31</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">584x</span>
+<span class="cline-any cline-yes">584x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">434x</span>
-<span class="cline-any cline-yes">434x</span>
+<span class="cline-any cline-yes">1112x</span>
+<span class="cline-any cline-yes">1112x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">6x</span>
-<span class="cline-any cline-yes">6x</span>
+<span class="cline-any cline-yes">7x</span>
+<span class="cline-any cline-yes">7x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">36x</span>
-<span class="cline-any cline-yes">40x</span>
-<span class="cline-any cline-yes">40x</span>
-<span class="cline-any cline-yes">36x</span>
-<span class="cline-any cline-yes">36x</span>
+<span class="cline-any cline-yes">47x</span>
+<span class="cline-any cline-yes">64x</span>
+<span class="cline-any cline-yes">64x</span>
+<span class="cline-any cline-yes">47x</span>
+<span class="cline-any cline-yes">47x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">434x</span>
-<span class="cline-any cline-yes">434x</span>
+<span class="cline-any cline-yes">1112x</span>
+<span class="cline-any cline-yes">1112x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">45x</span>
+<span class="cline-any cline-yes">45x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span></td><td class="text"><pre class="prettyprint lang-js">abstract class BaseRule {
@@ -134,7 +134,7 @@
         return this.error
     }
 &nbsp;
-    abstract validate(data: { [s: string]: any }, field: string, value?: any): Promise&lt;boolean&gt;;
+    abstract validate(data: { [s: string]: any }, field: string, value?: any): Promise&lt;boolean&gt; | boolean;
     abstract message(field: string, message: string, value?: any): { name: string, message: string };
 &nbsp;
     protected generateMessage(data: { [s: string]: string }, message: string) {
@@ -148,9 +148,9 @@
         return name.replace(/[A-Z]+/g, (m) =&gt; name.indexOf(m) === 0 ? m.toLowerCase() : `_${m.toLowerCase()}`)
     }
 &nbsp;
-    protected <span class="fstat-no" title="function not covered" >parseValue(value: string): string[] {</span>
-<span class="cstat-no" title="statement not covered" >        return value.split(',');</span>
-<span class="cstat-no" title="statement not covered" >    }</span>
+    protected parseValue(value: string): string[] {
+        return value.split(',');
+    }
 }
 &nbsp;
 export default BaseRule</pre></td></tr></table></pre>
@@ -160,7 +160,7 @@ export default BaseRule</pre></td></tr></table></pre>
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-03-31T15:56:37.429Z
+                at 2025-04-04T18:41:00.998Z
             </div>
         <script src="../../prettify.js"></script>
         <script>
