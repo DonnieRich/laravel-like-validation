@@ -3,7 +3,7 @@ import BaseRule from "../base/BaseRule.js";
 class Min extends BaseRule {
     protected error = "The {field} must have a min length of {value}"
 
-    async validate(data: { [s: string]: any }, field: string, value: string): Promise<boolean> {
+    validate(data: { [s: string]: any }, field: string, value: string): boolean {
 
         const isArray = Array.isArray(data[field]);
         const isString = typeof data[field] === "string";

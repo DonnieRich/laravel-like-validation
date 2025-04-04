@@ -4,7 +4,7 @@ class Max extends BaseRule {
     protected isInvalid = false;
     protected error = "The {field} must have a max length of {value}"
 
-    async validate(data: { [s: string]: any }, field: string, value: string): Promise<boolean> {
+    validate(data: { [s: string]: any }, field: string, value: string): boolean {
         const length = this.getFieldValue(data[field]);
 
         if (this.isInvalid) {

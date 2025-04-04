@@ -44,14 +44,12 @@ class Between extends BaseRule {
 
         if (Array.isArray(value)) return true;
         if (typeof value === 'string') return true;
-        if (!isNaN(Number(value))) return true;
-
-        console.log('invalid value', value)
+        if (!isNaN(Number(String(value)))) return true;
 
         return false;
     }
 
-    async validate(data: { [s: string]: any }, field: string, value?: string): Promise<boolean> {
+    validate(data: { [s: string]: any }, field: string, value?: string): boolean {
         const [min, max] = this.getMinMaxValues(value);
 
         if (min > max) {
@@ -65,13 +63,12 @@ class Between extends BaseRule {
         }
 
         if (!this.checkForArrayStringNumber(data[field])) {
-            console.log('invalid field')
             this.error = 'The field under validation ({field}) must be of type: Array, String or Number';
             return false;
         }
 
-        const minValidation = await new Min().validate(data, field, min);
-        const maxValidation = await new Max().validate(data, field, max);
+        const minValidation = new Min().validate(data, field, min);
+        const maxValidation = new Max().validate(data, field, max);
 
         return minValidation && maxValidation;
     }
