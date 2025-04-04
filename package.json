@@ -29,6 +29,16 @@
     "author": "DonnieRich",
     "license": "MIT",
     "description": "A package for a Laravel-Like Validation structure on ExpressJS",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/DonnieRich/laravel-like-validation.git"
+    },
+    "keywords": [
+        "laravel",
+        "validation",
+        "expressjs",
+        "typescript"
+    ],
     "devDependencies": {
         "@rollup/plugin-node-resolve": "^16.0.0",
         "@rollup/plugin-typescript": "^12.1.2",
