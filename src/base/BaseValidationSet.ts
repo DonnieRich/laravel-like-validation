@@ -6,8 +6,14 @@ import Numeric from "../rules/Numeric.js";
 import PresentIf from "../rules/PresentIf.js";
 import RegexMatch from "../rules/RegexMatch.js";
 import Required from "../rules/Required.js";
+import Nullable from "../rules/Nullable.js";
 import type { RulesSet } from "../types/RulesSet.js";
 import BaseRule from "./BaseRule.js";
+import Accepted from "../rules/Accepted.js";
+import Alpha from "../rules/Alpha.js";
+import CastBoolean from "../rules/CastBoolean.js";
+import Present from "../rules/Present.js";
+import Between from "../rules/Between.js";
 
 abstract class BaseValidationSet implements IValidationSet {
     protected rules: RulesSet;
@@ -24,6 +30,12 @@ abstract class BaseValidationSet implements IValidationSet {
         const isArray = new IsArray();
         const numeric = new Numeric();
         const presentIf = new PresentIf();
+        const nullable = new Nullable();
+        const accepted = new Accepted();
+        const alpha = new Alpha();
+        const boolean = new CastBoolean();
+        const present = new Present();
+        const between = new Between();
 
         return {
             [required.getName()]: required,
@@ -32,7 +44,13 @@ abstract class BaseValidationSet implements IValidationSet {
             [min.getName()]: min,
             [isArray.getName()]: isArray,
             [numeric.getName()]: numeric,
-            [presentIf.getName()]: presentIf
+            [presentIf.getName()]: presentIf,
+            [nullable.getName()]: nullable,
+            [accepted.getName()]: accepted,
+            [alpha.getName()]: alpha,
+            [boolean.getName()]: boolean,
+            [present.getName()]: present,
+            [between.getName()]: between,
         };
     }
 

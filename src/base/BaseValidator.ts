@@ -38,7 +38,7 @@ abstract class BaseValidator implements IValidator {
         [k: string]: string
     } = {};
 
-    protected fail: (error: object, validated: object) => void = (error, validated) => { return };
+    //TODO: add a list for all the fields that are validated but should not be passed in the request (like excluded, etc)
 
     private data: {} = {};
 

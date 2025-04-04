@@ -12,6 +12,8 @@ const mockRequestObject = {
     negativeNumber: -1500,
     zeroNumber: 0,
     negativeFloatNumber: -1500.5,
+    stringNumber: "1500",
+    stringNumberWithSpaces: " 1500 ",
     invalidField: {}
 }
 
@@ -74,6 +76,16 @@ describe("Numeric", () => {
         test("should invalidate an invalidField as numeric", async () => {
             const result = await numericValidator.validate(mockRequestObject, "invalidField");
             expect(result).toBe(false);
+        });
+
+        test("should validate a stringNumber as numeric", async () => {
+            const result = await numericValidator.validate(mockRequestObject, "stringNumber");
+            expect(result).toBe(true);
+        });
+
+        test("should validate a stringNumberWithSpaces as numeric", async () => {
+            const result = await numericValidator.validate(mockRequestObject, "stringNumberWithSpaces");
+            expect(result).toBe(true);
         });
     });
 

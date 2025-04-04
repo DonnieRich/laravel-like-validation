@@ -9,7 +9,7 @@ class Min extends BaseRule {
         const isString = typeof data[field] === "string";
         const isNumber = !isNaN(data[field]);
 
-        const validationValue = parseInt(value);
+        const validationValue = Number(value);
 
         const isValidationValueInvalid = isNaN(validationValue);
 
