@@ -1,12 +1,8 @@
-import { type Request } from "express"
-import type { IRuleObject } from "./IRuleObject.js";
 import type { IValidationSet } from "./IValidationSet.js";
-
+import type BaseValidation from "../base/BaseValidation.js";
+import type { Request } from "../types/Request.js";
 export interface IValidator {
-
-    rules(): IRuleObject;
-    messages(): { [k: string]: string };
-    attributes(): { [k: string]: string };
-    applyValidationSet(validationSet: IValidationSet): void;
-    validate(req: Request, fail: (error: object, validated: object) => void): Promise<void>;
+    setValidation(validation: BaseValidation): void;
+    setValidationSet(validationSet: IValidationSet): void;
+    validate(req: Request): Promise<[object, object]>;
 }

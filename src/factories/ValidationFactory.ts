@@ -1,46 +1,31 @@
+import type BaseValidation from "../base/BaseValidation.js";
 import BaseValidationFactory from "../base/BaseValidationFactory.js";
-import type { IValidationSet } from "../contracts/IValidationSet.js";
 import type { IValidator } from "../contracts/IValidator.js";
-import ValidationError from "../errors/ValidationError.js";
-import Validation from "../Validation.js";
-import ValidationSet from "../ValidationSet.js";
+import ValidationHandler from "../ValidationHandler.js";
+import Validator from "../Validator.js";
 
 class ValidationFactory extends BaseValidationFactory {
 
-    protected validationSet!: IValidationSet;
-    protected validationError!: typeof ValidationError;
+    private validator: IValidator;
 
-    protected getValidationError(): typeof ValidationError {
-        let validationError = this.validationError ?? ValidationError;
-        return validationError;
+    constructor() {
+        super();
+        this.validator = new Validator();
     }
 
-    protected getValidationSet(): IValidationSet {
-        let validationSet = this.validationSet ?? new ValidationSet();
-        return validationSet;
-    }
+    make(validation: BaseValidation): Function {
 
-    make(validator: IValidator, throwOnError: boolean = true): Function {
+        this.validator.setValidation(validation);
 
         const validationSet = this.getValidationSet();
-        validator.applyValidationSet(validationSet);
+        this.validator.setValidationSet(validationSet);
 
         let validationError = this.getValidationError();
 
-        const validation = new Validation(validator, throwOnError);
-        validation.applyValidationError(validationError);
+        const handler = new ValidationHandler(this.validator, this.throwOnError);
+        handler.applyValidationError(validationError);
 
-        return validation.init();
-    }
-
-    withValidationSet(validationSet: IValidationSet): ValidationFactory {
-        this.validationSet = validationSet;
-        return this;
-    }
-
-    withValidationError(validationError: typeof ValidationError): ValidationFactory {
-        this.validationError = validationError;
-        return this;
+        return handler.init();
     }
 
 }

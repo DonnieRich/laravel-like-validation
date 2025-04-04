@@ -1,10 +1,9 @@
 /// <reference types="express" />
-import type { IValidation } from "./contracts/IValidation.js";
+import type { IValidationHandler } from "./contracts/IValidationHandler.js";
 import ValidationError from "./errors/ValidationError.js";
 import type { IValidator } from "./contracts/IValidator.js";
 import type { Request, Response } from "express";
-
-class Validation implements IValidation {
+class ValidationHandler implements IValidationHandler {
 
     private validator: IValidator;
     private validationError!: typeof ValidationError;
@@ -37,42 +36,34 @@ class Validation implements IValidation {
         const merged: { [key: string]: object } = { ...start }
 
         for (const key in validated) {
-            if (typeof validated[key as keyof typeof validated] === 'object') {
-                merged[key] = { ...this.mergeValidated(validated[key as keyof typeof validated], merged[key]) }
-            } else {
-                merged[key] = validated[key as keyof typeof validated]
-            }
-
+            merged[key] = validated[key as keyof typeof validated]
         }
         return merged
     }
 
     private async validationMiddleware(req: Request, res: Response, next: Function): Promise<void> {
 
-        let result: { status: number, errors: object, validated: object } = {
-            status: 422,
-            errors: {},
-            validated: {}
-        };
-
         try {
 
-            await this.validator.validate(req, (error: object, validated: object) => {
+            let result: { status: number, errors: object, validated: object } = {
+                status: 422,
+                errors: {},
+                validated: {}
+            };
 
-                result.errors = this.mergeErrors(error, result.errors);
-                result.validated = this.mergeValidated(validated, result.validated)
+            const [errors, validated] = await this.validator.validate(req);
 
-            })
+            result.errors = this.mergeErrors(errors, result.errors);
+            result.validated = this.mergeValidated(validated, result.validated)
 
             if (Object.keys(result.errors).length > 0 && this.throwOnError) {
                 throw new this.validationError(result.errors);
             }
 
             req.locals = { result };
-
             next();
 
-        } catch (error: Error | ValidationError | any) {
+        } catch (error: any) {
             if (error.prototype instanceof ValidationError || error instanceof ValidationError) {
                 next(error)
             } else {
@@ -88,4 +79,4 @@ class Validation implements IValidation {
     }
 }
 
-export default Validation
+export default ValidationHandler;
