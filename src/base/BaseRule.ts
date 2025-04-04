@@ -9,7 +9,7 @@ abstract class BaseRule {
         return this.error
     }
 
-    abstract validate(data: { [s: string]: any }, field: string, value?: any): Promise<boolean>;
+    abstract validate(data: { [s: string]: any }, field: string, value?: any): Promise<boolean> | boolean;
     abstract message(field: string, message: string, value?: any): { name: string, message: string };
 
     protected generateMessage(data: { [s: string]: string }, message: string) {
