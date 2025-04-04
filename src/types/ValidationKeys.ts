@@ -1,4 +1,3 @@
-// export type ValidationKeys = Record<'body' | 'params' | 'query', [key: string, object] | object>;
 export type ErrorKeys = {
     body?: { [key: string]: object };
     params?: { [key: string]: object };

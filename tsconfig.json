@@ -13,7 +13,7 @@
         "target": "ES6",
         "verbatimModuleSyntax": true,
         "typeRoots": [
-            "./types"
+            "./types",
         ]
     },
     "include": [

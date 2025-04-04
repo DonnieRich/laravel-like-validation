@@ -6,7 +6,7 @@ import type BaseValidation from "./BaseValidation.js";
 import type { ErrorKeysType, ErrorPartialKeys, ValidatedPartialKeys } from "../types/ValidationKeys.js";
 import type { IValidator } from "../contracts/IValidator.js";
 import type { ParsedRule } from "../types/ParsedRule.js";
-import { type Request } from "express"
+import { type Request } from "../types/Request.js";
 
 abstract class BaseValidator implements IValidator {
     protected validationSet!: IValidationSet;
