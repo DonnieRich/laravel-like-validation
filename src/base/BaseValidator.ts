@@ -2,10 +2,9 @@ import BaseRule from "./BaseRule.js";
 import type { IValidationSet } from "../contracts/IValidationSet.js";
 import type { IValidationRequest } from "../contracts/IValidationRequest.js"
 import type { IRuleObject } from "../contracts/IRuleObject.js";
-import type { IParsedRule } from "../contracts/IParsedRule.js";
 import type { Result } from "../types/Result.js";
 import type BaseValidation from "./BaseValidation.js";
-import type { ErrorKeys, ErrorKeysType, ErrorPartialKeys, ValidatedKeys, ValidatedKeysType, ValidatedPartialKeys } from "../types/ValidationKeys.js";
+import type { ErrorKeysType, ErrorPartialKeys, ValidatedPartialKeys } from "../types/ValidationKeys.js";
 import type { IValidator } from "../contracts/IValidator.js";
 import type { ParsedRule } from "../types/ParsedRule.js";
 
