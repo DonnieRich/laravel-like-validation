@@ -209,51 +209,6 @@ abstract class BaseValidator implements IValidator {
             };
         }
 
-        // if (typeof rule === 'string') {
-
-        //     if (rule.match(/[a-z]+:.+/)) {
-        //         const [ruleKey, value] = this.validationSet.matchRule(rule);
-        //         const message = this.customMessages[`${key}.${ruleKey}`] ?? this.customMessages[ruleKey];
-        //         result.rule = validations[ruleKey].getName();
-        //         result.callValidation = async () => await validations[ruleKey].validate(this.data, key, value);
-        //         result.callMessage = () => validations[ruleKey].message(field, message, value);
-        //     } else if (validations[rule]) {
-        //         const message = this.customMessages[`${key}.${rule}`] ?? this.customMessages[rule];
-        //         result.rule = validations[rule].getName();
-        //         result.callValidation = async () => await validations[rule].validate(this.data, key);
-        //         result.callMessage = () => validations[rule].message(field, message);
-        //     }
-        // }
-
-        // if (rule instanceof BaseRule) {
-        //     const message = this.customMessages[`${key}.${rule.getName()}`] ?? this.customMessages[rule.getName()];
-        //     result.rule = rule.getName();
-        //     result.callValidation = async () => await rule.validate(this.data, key);
-        //     result.callMessage = () => rule.message(field, message);
-        // } else if (typeof rule === 'function') {
-        //     result.rule = "function";
-        //     result.isCustomFunction = true;
-        //     result.callValidation = async () => await rule(this.data, { key, current: this.currentValidationKey });
-        //     result.callMessage = null;
-        // }
-
-        // TODO: remove this?
-        // if (Array.isArray(rule)) {
-        //     if (rule[0] instanceof BaseRule) {
-        //         const values = rule.slice(1);
-        //         const message = this.customMessages[`${key}.${rule[0].getName()}`] ?? this.customMessages[rule[0].getName()];
-        //         result.rule = rule[0].getName();
-        //         result.callValidation = async () => await rule[0].validate(this.data, key, values);
-        //         result.callMessage = () => rule[0].message(field, message, values);
-        //     }
-        // }
-
-        // if (result.rule === null) {
-        //     this.foundInvalidRule = true;
-        //     this.invalidRuleMessage = `Invalid rule ${rule} applied to ${key}`;
-        // }
-
-        // return result;
     }
 
     private mapRulesToPromises(rules: (string | Function | BaseRule)[], key: string): Promise<object>[] {
