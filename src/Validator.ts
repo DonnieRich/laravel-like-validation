@@ -12,7 +12,7 @@ class Validator extends BaseValidator {
         this.validationSet = validationSet;
     }
 
-    public async validate(req: IValidationRequest, fail: (error: object, validated: object) => void): Promise<[object, object]> { //Promise<void> {
+    public async validate(req: IValidationRequest): Promise<[object, object]> { //Promise<void> {
         // this.fail = fail;
 
         this.beforeValidate();
