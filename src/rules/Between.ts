@@ -3,7 +3,7 @@ import Max from './Max.js';
 import Min from './Min.js';
 
 class Between extends BaseRule {
-    protected error = 'The {field} field must be between {minValue} and {maxValue}';
+    protected error = 'The {field} field must be between {min} and {max}';
 
     protected maxValue: number = Infinity;
     protected minValue: number = -Infinity;
@@ -50,6 +50,7 @@ class Between extends BaseRule {
     }
 
     validate(data: { [s: string]: any }, field: string, value?: string): boolean {
+
         const [min, max] = this.getMinMaxValues(value);
 
         if (min > max) {

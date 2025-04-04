@@ -2,6 +2,9 @@
 
 A package for a Laravel-Like Validation structure on ExpressJS.
 
+![NPM Version](https://img.shields.io/npm/v/%40ricciodev%2Flaravel-like-validation)
+
+
 ## Table of Contents
 
 - [Installation](#installation)
@@ -75,21 +78,22 @@ To apply the rules you can choose between `string` and `array` syntax:
 
 The advantage of the `array` syntax is that enables you to pass custom validation rules.
 You can pass them as anonymous functions.
-The first argument is the whole `data` received, the second argument is an object containing the `current` validation (`body`, `query` or `params`) and the `key` is the field beign validated.
-The last argument is the `fail` callback. To this callback you should pass one argument representing the validation error.
+The first argument is the whole `data` received, the second argument, the `key`, is the name of the field beign validated.
+The callback must return an array with two elements: the first is a `boolean` representing the result of the validation, the second is an object representing the error to pass in the response in case of failed validation.
+
+You can also pass `async` function if you need to perform asynchronous operations inside your callback (i.e. database queries, http requests, etc...).
+Make sure to use `await` before calling the asynchronous method.
 
 ```js
-
 {
     body: {
-        title: ['required', (data, { current, key }, fail) => {
+        tags: ['is_array', (data, key) => {
+            const noEmptyItems = data[key].every(tag => tag.trim() !== '');
 
-            const emptyTag = data[key].some(tag => tag.trim() === '');
-
-            if (emptyTag) {
-                fail({ [current]: { [key]: { 'empty-items': 'Tags cannot have empty items' } } });
-            }
-
+            return [
+                noEmptyItems,
+                { name: 'empty-items', message: 'Tags cannot have empty items' }
+            ]
         }]
     }
 }
@@ -311,15 +315,67 @@ You can then apply this middleware in the ExpressJS route, as seen before.
 
 This is a list of all available validations
 
-### is_array
 
-Check if the field is an array.
-Usage:
+### accepted
+Checks if the field is accepted. This means the value must be `true`, `'true'`, `1`, `'1'`, `'yes'`, or `'on'`.
 
+### alpha
+Validates that the field contains only Unicode alphabetic characters. Optionally, you can pass `alpha:ascii` to restrict validation to ASCII alphabetic characters (`a-zA-Z`).
+
+### between:min,max
+Ensures the field's value is between a specified minimum and maximum. Pass the range as a string in the format `between:min,max`.
+For a better experience, make use of the fluent syntax of the `Rule` facade:
 ```js
-body: {
-    tags: 'is_array'
+{
+    content: [Rule.between().min(min).max(max)]
 }
 ```
 
+### boolean
+Validates that the field can be cast to a boolean. Acceptable values include `true`, `false`, `1`, `0`, `'1'`, and `'0'`.
+
+### declined
+Checks if the field is declined. This means the value must be `false`, `'false'`, `0`, `'0'`, `'no'`, or `'off'`.
+
+### is_array
+Checks if the field is an array. No additional parameters are required.
+
+### max:value
+Validates that the field's value does not exceed a specified maximum. For strings and arrays, this checks the length; for numbers, it checks the value.
+
+### min:value
+Ensures the field's value meets a specified minimum. For strings and arrays, this checks the length; for numbers, it checks the value.
+
+### nullable
+Allows the field to be null. If the field is null, no further validation is performed.
+
+### numeric
+Validates that the field is a number. This includes integers and floats.
+
+### present
+Checks if the field is present in the input data, regardless of its value.
+
+### present_if:field,value
+Validates that the field is present if another field has a specific value. Pass the dependent field and value as a string in the format `present_if:field,value`.
+For a better experience, make use of the fluent syntax of the `Rule` facade:
+```js
+{
+    content: [Rule.present_if().field(field).value(value)]
+}
+```
+
+### regex_match:expr
+Ensures the field matches a specified regular expression. Pass the regex pattern as a string.
+
+### required
+Validates that the field is not empty. For strings, it checks for non-whitespace characters; for arrays and objects, it checks for non-zero length or keys.
+
+
 ### Next steps
+
+- unit test for new rules
+- add more validation rules
+- add rule facade
+
+## License
+MIT

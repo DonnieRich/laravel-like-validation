@@ -1,5 +1,5 @@
 import { describe, expect, test, vi } from "vitest";
-import ValidationFacade from '../../src/facades/ValidationFacade';
+import Validation from '../../src/facades/Validation';
 import ValidationError from "../../src/errors/ValidationError";
 import { afterEach } from "node:test";
 import ValidationFactory from "../../src/factories/ValidationFactory";
@@ -73,7 +73,7 @@ afterEach(() => {
 describe("Errors", () => {
 
     test("should throw an error if the validation rule is malformed", async () => {
-        const middleware = ValidationFacade.make(validation);
+        const middleware = Validation.make(validation);
         const req = { body: data.invalid.body };
         const res = {};
         const next = vi.spyOn(utils, 'next').mockImplementation(() => next)
@@ -99,7 +99,7 @@ describe("Errors", () => {
     });
 
     test("should throw an error if the validation rule is malformed in an array", async () => {
-        const middleware = ValidationFacade.make(malformedRulesInArray);
+        const middleware = Validation.make(malformedRulesInArray);
         const req = { body: data.valid.body };
         const res = {};
         const next = vi.spyOn(utils, 'next').mockImplementation(() => next)
@@ -119,7 +119,7 @@ describe("Errors", () => {
     });
 
     test("should pass if the validation rules are an empty array", async () => {
-        const middleware = ValidationFacade.make(emptyRulesArray);
+        const middleware = Validation.make(emptyRulesArray);
         const req = { body: data.invalid.body };
         const res = {};
         const next = vi.spyOn(utils, 'next').mockImplementation(() => next)
@@ -132,7 +132,7 @@ describe("Errors", () => {
     });
 
     test("should throw an error if the callback validation rule doesn't return a value", async () => {
-        const middleware = ValidationFacade.make(malformedRulesInArrayWithCallback);
+        const middleware = Validation.make(malformedRulesInArrayWithCallback);
         const req = { body: data.valid.body };
         const res = {};
         const next = vi.spyOn(utils, 'next').mockImplementation(() => next)
@@ -152,7 +152,7 @@ describe("Errors", () => {
     });
 
     test("should throw an error if the callback validation rule doesn't return a value", async () => {
-        const middleware = ValidationFacade.make(malformedRulesInArrayWithCallbackReturingWrongValue);
+        const middleware = Validation.make(malformedRulesInArrayWithCallbackReturingWrongValue);
         const req = { body: data.valid.body };
         const res = {};
         const next = vi.spyOn(utils, 'next').mockImplementation(() => next)

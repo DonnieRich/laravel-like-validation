@@ -14,6 +14,7 @@ import Alpha from "../rules/Alpha.js";
 import CastBoolean from "../rules/CastBoolean.js";
 import Present from "../rules/Present.js";
 import Between from "../rules/Between.js";
+import Declined from "../rules/Declined.js";
 
 abstract class BaseValidationSet implements IValidationSet {
     protected rules: RulesSet;
@@ -36,6 +37,7 @@ abstract class BaseValidationSet implements IValidationSet {
         const boolean = new CastBoolean();
         const present = new Present();
         const between = new Between();
+        const declined = new Declined();
 
         return {
             [required.getName()]: required,
@@ -51,6 +53,7 @@ abstract class BaseValidationSet implements IValidationSet {
             [boolean.getName()]: boolean,
             [present.getName()]: present,
             [between.getName()]: between,
+            [declined.getName()]: declined,
         };
     }
 

@@ -1,5 +1,5 @@
 import { describe, expect, test, vi } from "vitest";
-import ValidationFacade from '../../src/facades/ValidationFacade';
+import ValidationFacade from '../../src/facades/Validation';
 import ValidationError from "../../src/errors/ValidationError";
 import { afterEach } from "node:test";
 import PresentIf from "../../src/rules/PresentIf";
