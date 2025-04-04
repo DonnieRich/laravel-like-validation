@@ -2,6 +2,7 @@ import type BaseValidation from "./base/BaseValidation.js";
 import type { IValidationRequest } from "./contracts/IValidationRequest.js";
 import type { IValidationSet } from "./contracts/IValidationSet.js";
 import BaseValidator from "./base/BaseValidator.js";
+import type { Request } from "express";
 
 class Validator extends BaseValidator {
     public setValidation(validation: BaseValidation): void {
@@ -12,7 +13,7 @@ class Validator extends BaseValidator {
         this.validationSet = validationSet;
     }
 
-    public async validate(req: IValidationRequest): Promise<[object, object]> {
+    public async validate(req: Request): Promise<[object, object]> {
 
         this.beforeValidate();
 

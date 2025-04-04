@@ -1,13 +1,12 @@
 import BaseRule from "./BaseRule.js";
 import type { IValidationSet } from "../contracts/IValidationSet.js";
-import type { IValidationRequest } from "../contracts/IValidationRequest.js"
 import type { IRuleObject } from "../contracts/IRuleObject.js";
 import type { Result } from "../types/Result.js";
 import type BaseValidation from "./BaseValidation.js";
 import type { ErrorKeysType, ErrorPartialKeys, ValidatedPartialKeys } from "../types/ValidationKeys.js";
 import type { IValidator } from "../contracts/IValidator.js";
 import type { ParsedRule } from "../types/ParsedRule.js";
-
+import { type Request } from "express"
 
 abstract class BaseValidator implements IValidator {
     protected validationSet!: IValidationSet;
@@ -358,7 +357,7 @@ abstract class BaseValidator implements IValidator {
 
     abstract setValidation(validation: BaseValidation): void;
     abstract setValidationSet(validationSet: IValidationSet): void;
-    abstract validate(req: IValidationRequest): Promise<[object, object]>;
+    abstract validate(req: Request): Promise<[object, object]>;
 
 }
 
