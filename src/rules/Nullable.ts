@@ -3,8 +3,8 @@ import BaseRule from "../base/BaseRule.js";
 class Nullable extends BaseRule {
     protected error = 'The {field} field may be null';
 
-    async validate(data: { [s: string]: any }, field: string): Promise<boolean> {
-        return true;
+    validate(data: { [s: string]: any }, field: string): boolean {
+        return typeof data[field] !== "undefined";
     }
 
     message(field: string, message: string = ''): { name: string, message: string } {
