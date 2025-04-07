@@ -162,9 +162,9 @@ describe("PresentIf", () => {
         it("Should return a custom error message", () => {
             const presentIf = new PresentIf();
 
-            const result = presentIf.message("field", "{field} must be present when {fieldToCheck} is {valueToCheck}", "fieldToCheck,valueToCheck");
+            const result = presentIf.message("title", "{field} must be present when {fieldToCheck} is {valueToCheck}", "privacyPolicy,true");
 
-            expect(result.message).toBe("field must be present when fieldToCheck is valueToCheck");
+            expect(result.message).toBe("title must be present when privacyPolicy is true");
         });
 
         it("Should have a default error message", () => {
