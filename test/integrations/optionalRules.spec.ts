@@ -5,7 +5,7 @@ import ValidationFacade from '../../src/facades/Validation';
 const validation = {
     body: {
         title: 'required|min:1',
-        content: 'required|min:10'
+        content: 'nullable|min:10'
     }
 }
 
@@ -13,7 +13,7 @@ const data = {
     valid: {
         body: {
             title: "Hello World!",
-            contents: null
+            content: null
         }
     }
 }
@@ -29,7 +29,7 @@ afterEach(() => {
 describe("Optional rules", () => {
 
     describe("Nullable", () => {
-        test.skip("If field is null do not apply other validations", async () => {
+        test("If field is null do not apply other validations", async () => {
             const middleware = ValidationFacade.make(validation);
             const req = { body: data.valid.body };
             const res = {};
@@ -45,7 +45,7 @@ describe("Optional rules", () => {
                         errors: {},
                         validated: {
                             body: {
-                                title: "Hello World",
+                                title: "Hello World!",
                                 content: null
                             }
                         }

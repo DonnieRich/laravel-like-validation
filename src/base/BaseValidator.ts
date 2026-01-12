@@ -201,6 +201,9 @@ abstract class BaseValidator implements IValidator {
                     result.rule = validations[ruleKey].getName();
                     result.callValidation = async () => await validations[ruleKey].validate(this.data, key, value);
                     result.callMessage = () => validations[ruleKey].message(field, message, value);
+                    if (validations[ruleKey] && typeof validations[ruleKey].isOptional === 'function' && validations[ruleKey].isOptional()) {
+                        this.optionalFields[this.currentValidationKey][key] = true;
+                    }
 
                 } else if (validations[rule]) {
 
@@ -208,6 +211,9 @@ abstract class BaseValidator implements IValidator {
                     result.rule = validations[rule].getName();
                     result.callValidation = async () => await validations[rule].validate(this.data, key);
                     result.callMessage = () => validations[rule].message(field, message);
+                    if (validations[rule] && typeof validations[rule].isOptional === 'function' && validations[rule].isOptional()) {
+                        this.optionalFields[this.currentValidationKey][key] = true;
+                    }
 
                 }
 
@@ -237,6 +243,17 @@ abstract class BaseValidator implements IValidator {
             const v = this.getRule(rule, key);
 
             return await new Promise<object>(async (resolve, reject) => {
+
+                // If this field has an optional rule (e.g. nullable) and the value is
+                // explicitly null, skip all other validations for this field.
+                if (
+                    this.optionalFields[this.currentValidationKey] &&
+                    this.optionalFields[this.currentValidationKey][key] &&
+                    this.data[key as keyof typeof this.data] === null
+                ) {
+                    resolve({ [this.currentValidationKey]: { [key]: this.data[key as keyof typeof this.data] } });
+                    return;
+                }
 
                 if (v.rule === null) {
 
