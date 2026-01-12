@@ -23,16 +23,16 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">38.88% </span>
+                <span class="strong">28.57% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>7/18</span>
+                <span class='fraction'>2/7</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">100% </span>
+                <span class="strong">0% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>1/1</span>
+                <span class='fraction'>0/3</span>
             </div>
         
             
@@ -44,9 +44,9 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">38.88% </span>
+                <span class="strong">28.57% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>7/18</span>
+                <span class='fraction'>2/7</span>
             </div>
         
             
@@ -86,50 +86,50 @@
 <a name='L21'></a><a href='#L21'>21</a>
 <a name='L22'></a><a href='#L22'>22</a>
 <a name='L23'></a><a href='#L23'>23</a>
-<a name='L24'></a><a href='#L24'>24</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">1x</span>
+<a name='L24'></a><a href='#L24'>24</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">31x</span>
-<span class="cline-any cline-yes">31x</span>
+<span class="cline-any cline-yes">40x</span>
+<span class="cline-any cline-yes">40x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span></td><td class="text"><pre class="prettyprint lang-js">import BaseRule from '../base/BaseRule.js';
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import BaseRule from '../base/BaseRule.js';
 &nbsp;
 class Alpha extends BaseRule {
     protected error = 'The {field} field must be entirely Unicode alphabetic characters contained in the Unicode General Category Letter (L) or Mark (M)';
 &nbsp;
-<span class="fstat-no" title="function not covered" >    async validate(data: { [s: string]: any }, field: string, value?: "ascii"): Promise&lt;boolean&gt; {</span>
+    async <span class="fstat-no" title="function not covered" >validate(d</span>ata: { [s: string]: any }, field: string, value?: "ascii"): Promise&lt;boolean&gt; {
 &nbsp;
 <span class="cstat-no" title="statement not covered" >        if (value === 'ascii') {</span>
 <span class="cstat-no" title="statement not covered" >            this.error = 'The {field} field must be entirely ASCII alphabetic characters (a-zA-Z)';</span>
 <span class="cstat-no" title="statement not covered" >            return /^[a-zA-Z]+$/.test(data[field]);</span>
-<span class="cstat-no" title="statement not covered" >        }</span>
+        }
 &nbsp;
 <span class="cstat-no" title="statement not covered" >        return /\p{L}|\p{M}/u.test(data[field]);</span>
-<span class="cstat-no" title="statement not covered" >    }</span>
+    }
 &nbsp;
-<span class="fstat-no" title="function not covered" >    message(field: string, message: string = ''): { name: string; message: string } {</span>
+<span class="fstat-no" title="function not covered" >    message(f</span>ield: string, message: string = <span class="branch-0 cbranch-no" title="branch not covered" >''): { name: string; message: string } {</span>
 <span class="cstat-no" title="statement not covered" >        return {</span>
-<span class="cstat-no" title="statement not covered" >            name: this.getName(),</span>
-<span class="cstat-no" title="statement not covered" >            message: this.generateMessage({ field }, message),</span>
-<span class="cstat-no" title="statement not covered" >        };</span>
-<span class="cstat-no" title="statement not covered" >    }</span>
+            name: this.getName(),
+            message: this.generateMessage({ field }, message),
+        };
+    }
 }
 &nbsp;
 export default Alpha;</pre></td></tr></table></pre>
@@ -139,7 +139,7 @@ export default Alpha;</pre></td></tr></table></pre>
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-04-04T18:41:00.998Z
+                at 2026-01-12T19:56:39.742Z
             </div>
         <script src="../../prettify.js"></script>
         <script>

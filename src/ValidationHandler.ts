@@ -55,11 +55,14 @@ class ValidationHandler implements IValidationHandler {
             result.errors = this.mergeErrors(errors, result.errors);
             result.validated = this.mergeValidated(validated, result.validated)
 
+            // always attach result to the request so downstream handlers
+            // (including error handlers) can access validation details
+            req.locals = { result };
+
             if (Object.keys(result.errors).length > 0 && this.throwOnError) {
                 throw new this.validationError(result.errors);
             }
 
-            req.locals = { result };
             next();
 
         } catch (error: any) {

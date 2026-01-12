@@ -1,8 +1,7 @@
-import { describe, expect, test, vi } from "vitest";
+import { describe, expect, test, vi, afterEach } from "vitest";
 import BaseValidation from '../../src/base/BaseValidation';
 import ValidationFactory from '../../src/factories/ValidationFactory';
 import ValidationError from "../../src/errors/ValidationError";
-import { afterEach } from "node:test";
 import ValidationSet from "../../src/ValidationSet";
 import BaseRule from "../../src/base/BaseRule";
 
@@ -89,7 +88,7 @@ describe("ValidationFactory", () => {
         await middleware(req, res, next);
 
         expect(next).toHaveBeenCalled();
-        expect(next).toHaveBeenCalledWith(new ValidationError({}));
+        expect(next).toHaveBeenCalledWith(expect.any(ValidationError));
         expect(next).toHaveBeenCalledWith(expect.objectContaining({ status: 422 }));
         expect(next).toHaveBeenCalledWith(expect.objectContaining({
             errors: {
@@ -225,7 +224,7 @@ describe("ValidationFactory", () => {
         await middleware(req, res, next);
 
         expect(next).toHaveBeenCalled();
-        expect(next).toHaveBeenCalledWith(new ValidationError({}));
+        expect(next).toHaveBeenCalledWith(expect.any(ValidationError));
         expect(next).toHaveBeenCalledWith(expect.objectContaining({ status: 422 }));
         expect(next).toHaveBeenCalledWith(expect.objectContaining({
             errors: {
@@ -265,7 +264,7 @@ describe("ValidationFactory", () => {
         await middleware(req, res, next);
 
         expect(next).toHaveBeenCalled();
-        expect(next).toHaveBeenCalledWith(new ValidationError({}));
+        expect(next).toHaveBeenCalledWith(expect.any(ValidationError));
         expect(next).toHaveBeenCalledWith(expect.objectContaining({ status: 422 }));
         expect(next).toHaveBeenCalledWith(expect.objectContaining({
             errors: {
@@ -345,7 +344,7 @@ describe("ValidationFactory", () => {
         await middleware(req, res, next);
 
         expect(next).toHaveBeenCalled();
-        expect(next).toHaveBeenCalledWith(new ValidationError({}));
+        expect(next).toHaveBeenCalledWith(expect.any(ValidationError));
         expect(next).toHaveBeenCalledWith(expect.objectContaining({ status: 400 }));
     });
 })

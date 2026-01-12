@@ -24,6 +24,16 @@ abstract class BaseValidator implements IValidator {
         query: {}
     };
 
+    private optionalFields: {
+        body: {[k: string]: boolean},
+        params: {[k: string]: boolean},
+        query: {[k: string]: boolean}
+    } = {
+        body: {},
+        params: {},
+        query: {}
+    }
+
     protected customRules: IRuleObject = {
         body: {},
         params: {},
@@ -145,7 +155,12 @@ abstract class BaseValidator implements IValidator {
     private getRule(rule: string | Function | BaseRule, key: string): ParsedRule {
 
         const field = this.customAttributes[key] ?? key;
+        // TODO: move this out of this method
         const validations = this.validationSet.getRules();
+
+        // check if rule is optional (i.e. nullable, sometimes, etc...)
+        // if the optional validation return true (i.e. field is null or undefined), the following validation rules should be ignored
+        // tags: 'nullable|is_array|max:3' -> if tags is null, no need to check for is_array or max
 
         if (typeof rule === 'function') {
 
@@ -173,6 +188,10 @@ abstract class BaseValidator implements IValidator {
                 result.callValidation = async () => await rule.validate(this.data, key);
                 result.callMessage = () => rule.message(field, message);
 
+                if (rule.isOptional()) {
+                    this.optionalFields[this.currentValidationKey][key] = true;
+                }
+
             } else if (typeof rule === 'string') {
 
                 if (rule.match(/[a-z]+:.+/)) {
@@ -182,6 +201,9 @@ abstract class BaseValidator implements IValidator {
                     result.rule = validations[ruleKey].getName();
                     result.callValidation = async () => await validations[ruleKey].validate(this.data, key, value);
                     result.callMessage = () => validations[ruleKey].message(field, message, value);
+                    if (validations[ruleKey] && typeof validations[ruleKey].isOptional === 'function' && validations[ruleKey].isOptional()) {
+                        this.optionalFields[this.currentValidationKey][key] = true;
+                    }
 
                 } else if (validations[rule]) {
 
@@ -189,6 +211,9 @@ abstract class BaseValidator implements IValidator {
                     result.rule = validations[rule].getName();
                     result.callValidation = async () => await validations[rule].validate(this.data, key);
                     result.callMessage = () => validations[rule].message(field, message);
+                    if (validations[rule] && typeof validations[rule].isOptional === 'function' && validations[rule].isOptional()) {
+                        this.optionalFields[this.currentValidationKey][key] = true;
+                    }
 
                 }
 
@@ -218,6 +243,17 @@ abstract class BaseValidator implements IValidator {
             const v = this.getRule(rule, key);
 
             return await new Promise<object>(async (resolve, reject) => {
+
+                // If this field has an optional rule (e.g. nullable) and the value is
+                // explicitly null, skip all other validations for this field.
+                if (
+                    this.optionalFields[this.currentValidationKey] &&
+                    this.optionalFields[this.currentValidationKey][key] &&
+                    this.data[key as keyof typeof this.data] === null
+                ) {
+                    resolve({ [this.currentValidationKey]: { [key]: this.data[key as keyof typeof this.data] } });
+                    return;
+                }
 
                 if (v.rule === null) {
 
