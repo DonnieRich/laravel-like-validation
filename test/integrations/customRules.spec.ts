@@ -88,7 +88,7 @@ describe("Custom Rules", () => {
 
         await middleware(req, res, next);
 
-        expect(next).toHaveBeenCalledWith(new ValidationError({}));
+        expect(next).toHaveBeenCalledWith(expect.any(ValidationError));
         expect(next).toHaveBeenCalledWith(expect.objectContaining({ status: 422 }));
         expect(next).toHaveBeenCalledWith(expect.objectContaining({
 
@@ -117,7 +117,7 @@ describe("Custom Rules", () => {
 
         await middleware(req, res, next);
 
-        expect(next).toHaveBeenCalledWith(new ValidationError({}));
+        expect(next).toHaveBeenCalledWith(expect.any(ValidationError));
         expect(next).toHaveBeenCalledWith(expect.objectContaining({ status: 422 }));
         expect(next).toHaveBeenCalledWith(expect.objectContaining({
 

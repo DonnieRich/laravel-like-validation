@@ -25,5 +25,8 @@
             "_build",
             "temp/*"
         ]
-    }
+    },
+    "libraries": [
+        "ES2021"
+    ]
 }

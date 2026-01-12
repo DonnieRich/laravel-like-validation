@@ -23,16 +23,16 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">70.58% </span>
+                <span class="strong">80% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>12/17</span>
+                <span class='fraction'>4/5</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">37.5% </span>
+                <span class="strong">14.28% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>3/8</span>
+                <span class='fraction'>1/7</span>
             </div>
         
             
@@ -44,9 +44,9 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">70.58% </span>
+                <span class="strong">80% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>12/17</span>
+                <span class='fraction'>4/5</span>
             </div>
         
             
@@ -61,7 +61,7 @@
             </div>
         </template>
     </div>
-    <div class='status-line medium'></div>
+    <div class='status-line high'></div>
     <pre><table class="coverage">
 <tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
 <a name='L2'></a><a href='#L2'>2</a>
@@ -84,42 +84,42 @@
 <a name='L19'></a><a href='#L19'>19</a>
 <a name='L20'></a><a href='#L20'>20</a>
 <a name='L21'></a><a href='#L21'>21</a>
-<a name='L22'></a><a href='#L22'>22</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">1x</span>
+<a name='L22'></a><a href='#L22'>22</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">31x</span>
-<span class="cline-any cline-yes">31x</span>
+<span class="cline-any cline-yes">39x</span>
+<span class="cline-any cline-yes">39x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">2x</span>
-<span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">64x</span>
-<span class="cline-any cline-yes">64x</span>
-<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span></td><td class="text"><pre class="prettyprint lang-js">import BaseRule from '../base/BaseRule.js';
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">80x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import BaseRule from '../base/BaseRule.js';
 &nbsp;
 class CastBoolean extends BaseRule {
     protected error = 'The {field} field must be able to be cast as a boolean';
 &nbsp;
     async validate(data: { [s: string]: any }, field: string): Promise&lt;boolean&gt; {
-        return data[field] === <span class="branch-0 cbranch-no" title="branch not covered" >true || data[field] === <span class="branch-0 cbranch-no" title="branch not covered" >false || d</span>ata[field] === <span class="branch-0 cbranch-no" title="branch not covered" >1 || d</span>ata[field] === <span class="branch-0 cbranch-no" title="branch not covered" >0 || d</span>ata[field] === <span class="branch-0 cbranch-no" title="branch not covered" >'1' || d</span>ata[field] === '0';</span>
+        return data[field] === true || <span class="branch-1 cbranch-no" title="branch not covered" >data[field] === false || <span class="branch-2 cbranch-no" title="branch not covered" >d</span>ata[field] === 1 || <span class="branch-3 cbranch-no" title="branch not covered" >d</span>ata[field] === 0 || <span class="branch-4 cbranch-no" title="branch not covered" >d</span>ata[field] === '1' || <span class="branch-5 cbranch-no" title="branch not covered" >d</span>ata[field] === '0';</span>
     }
 &nbsp;
-<span class="fstat-no" title="function not covered" >    message(field: string, message: string = ''): { name: string; message: string } {</span>
+<span class="fstat-no" title="function not covered" >    message(f</span>ield: string, message: string = <span class="branch-0 cbranch-no" title="branch not covered" >''): { name: string; message: string } {</span>
 <span class="cstat-no" title="statement not covered" >        return {</span>
-<span class="cstat-no" title="statement not covered" >            name: this.getName(),</span>
-<span class="cstat-no" title="statement not covered" >            message: this.generateMessage({ field }, message),</span>
-<span class="cstat-no" title="statement not covered" >        };</span>
-<span class="cstat-no" title="statement not covered" >    }</span>
+            name: this.getName(),
+            message: this.generateMessage({ field }, message),
+        };
+    }
 &nbsp;
     getName() {
         return 'boolean';
@@ -133,7 +133,7 @@ export default CastBoolean;</pre></td></tr></table></pre>
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-04-04T18:41:00.998Z
+                at 2026-01-12T19:22:31.370Z
             </div>
         <script src="../../prettify.js"></script>
         <script>

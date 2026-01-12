@@ -1,7 +1,6 @@
-import { describe, expect, test, vi } from "vitest";
+import { describe, expect, test, vi, afterEach } from "vitest";
 import ValidationFacade from '../../src/facades/Validation';
 import ValidationError from "../../src/errors/ValidationError";
-import { afterEach } from "node:test";
 import Rule from "../../src/facades/Rule";
 
 const validation = {
@@ -81,7 +80,7 @@ describe("ValidationFacade", () => {
         await middleware(req, res, next);
 
         expect(next).toHaveBeenCalled();
-        expect(next).toHaveBeenCalledWith(new ValidationError({}));
+        expect(next).toHaveBeenCalledWith(expect.any(ValidationError));
         expect(next).toHaveBeenCalledWith(expect.objectContaining({ status: 422 }));
         expect(next).toHaveBeenCalledWith(expect.objectContaining({
             errors: {
@@ -113,7 +112,7 @@ describe("ValidationFacade", () => {
         await middleware(req, res, next);
 
         expect(next).toHaveBeenCalled();
-        expect(next).toHaveBeenCalledWith(new ValidationError({}));
+        expect(next).toHaveBeenCalledWith(expect.any(ValidationError));
         expect(next).toHaveBeenCalledWith(expect.objectContaining({ status: 422 }));
         expect(next).toHaveBeenCalledWith(expect.objectContaining({
             errors: {
@@ -151,7 +150,7 @@ describe("ValidationFacade", () => {
         await middleware(req, res, next);
 
         expect(next).toHaveBeenCalled();
-        expect(next).toHaveBeenCalledWith(new ValidationError({}));
+        expect(next).toHaveBeenCalledWith(expect.any(ValidationError));
         expect(next).toHaveBeenCalledWith(expect.objectContaining({ status: 422 }));
         expect(next).toHaveBeenCalledWith(expect.objectContaining({
             errors: {
@@ -187,7 +186,7 @@ describe("ValidationFacade", () => {
         await middleware(req, res, next);
 
         expect(next).toHaveBeenCalled();
-        expect(next).toHaveBeenCalledWith(new ValidationError({}));
+        expect(next).toHaveBeenCalledWith(expect.any(ValidationError));
         expect(next).toHaveBeenCalledWith(expect.objectContaining({ status: 422 }));
         expect(next).toHaveBeenCalledWith(expect.objectContaining({
             errors: {
@@ -215,7 +214,7 @@ describe("ValidationFacade", () => {
         await middleware(req, res, next);
 
         expect(next).toHaveBeenCalled();
-        expect(next).toHaveBeenCalledWith(new ValidationError({}));
+        expect(next).toHaveBeenCalledWith(expect.any(ValidationError));
         expect(next).toHaveBeenCalledWith(expect.objectContaining({ status: 422 }));
         expect(next).toHaveBeenCalledWith(expect.objectContaining({
             errors: {

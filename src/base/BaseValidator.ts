@@ -24,6 +24,16 @@ abstract class BaseValidator implements IValidator {
         query: {}
     };
 
+    private optionalFields: {
+        body: {[k: string]: boolean},
+        params: {[k: string]: boolean},
+        query: {[k: string]: boolean}
+    } = {
+        body: {},
+        params: {},
+        query: {}
+    }
+
     protected customRules: IRuleObject = {
         body: {},
         params: {},
@@ -145,7 +155,12 @@ abstract class BaseValidator implements IValidator {
     private getRule(rule: string | Function | BaseRule, key: string): ParsedRule {
 
         const field = this.customAttributes[key] ?? key;
+        // TODO: move this out of this method
         const validations = this.validationSet.getRules();
+
+        // check if rule is optional (i.e. nullable, sometimes, etc...)
+        // if the optional validation return true (i.e. field is null or undefined), the following validation rules should be ignored
+        // tags: 'nullable|is_array|max:3' -> if tags is null, no need to check for is_array or max
 
         if (typeof rule === 'function') {
 
@@ -172,6 +187,10 @@ abstract class BaseValidator implements IValidator {
                 result.rule = rule.getName();
                 result.callValidation = async () => await rule.validate(this.data, key);
                 result.callMessage = () => rule.message(field, message);
+
+                if (rule.isOptional()) {
+                    this.optionalFields[this.currentValidationKey][key] = true;
+                }
 
             } else if (typeof rule === 'string') {
 

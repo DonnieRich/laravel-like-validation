@@ -1,7 +1,6 @@
-import { describe, expect, test, vi } from "vitest";
+import { describe, expect, test, vi, afterEach } from "vitest";
 import ValidationFacade from '../../src/facades/Validation';
 import ValidationError from "../../src/errors/ValidationError";
-import { afterEach } from "node:test";
 import PresentIf from "../../src/rules/PresentIf";
 import { IRuleObject } from "../../src/contracts/IRuleObject";
 
@@ -117,19 +116,6 @@ describe("Custom Rules", () => {
                 }
             }
         })
-
-        // expect(next).toHaveBeenCalledWith(new ValidationError({}));
-        // expect(next).toHaveBeenCalledWith(expect.objectContaining({ status: 422 }));
-        // expect(next).toHaveBeenCalledWith(expect.objectContaining({
-        //     errors: {
-        //         body: {
-        //             tags: {
-        //                 present_if: "The tags field must be present if the field terms has a value of true",
-        //             }
-        //         }
-        //     }
-        // }))
-
     });
 
     test("should return the error for malformed data", async () => {
@@ -140,7 +126,7 @@ describe("Custom Rules", () => {
 
         await middleware(req, res, next);
 
-        expect(next).toHaveBeenCalledWith(new ValidationError({}));
+        expect(next).toHaveBeenCalledWith(expect.any(ValidationError));
         expect(next).toHaveBeenCalledWith(expect.objectContaining({ status: 422 }));
         expect(next).toHaveBeenCalledWith(expect.objectContaining({
             errors: {
