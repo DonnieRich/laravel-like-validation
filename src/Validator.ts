@@ -1,8 +1,7 @@
-/// <reference types="express" />
 import type BaseValidation from "./base/BaseValidation.js";
 import type { IValidationSet } from "./contracts/IValidationSet.js";
 import BaseValidator from "./base/BaseValidator.js";
-import type { Request } from "express";
+import type { Request } from "./types/Request.js";
 
 class Validator extends BaseValidator {
     public setValidation(validation: BaseValidation): void {
