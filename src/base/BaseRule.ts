@@ -1,5 +1,6 @@
 abstract class BaseRule {
     protected error: string = `Missing default error message for ${this.getName()} applied on {field}`;
+    protected optional: boolean = false;
 
     getName(): string {
         return this.pascalCaseToSnakeCase(this.constructor.name)
@@ -7,6 +8,10 @@ abstract class BaseRule {
 
     getError(): string {
         return this.error
+    }
+
+    isOptional(): boolean {
+        return this.optional
     }
 
     abstract validate(data: { [s: string]: any }, field: string, value?: any): Promise<boolean> | boolean;
@@ -23,8 +28,11 @@ abstract class BaseRule {
         return name.replace(/[A-Z]+/g, (m) => name.indexOf(m) === 0 ? m.toLowerCase() : `_${m.toLowerCase()}`)
     }
 
-    protected parseValue(value: string): string[] {
-        return value.split(',');
+    protected parseValue(value: any): string[] {
+        if (Array.isArray(value)) return value as string[];
+        if (typeof value === 'string') return value.split(',');
+        if (value === null || typeof value === 'undefined') return [];
+        return [String(value)];
     }
 }
 

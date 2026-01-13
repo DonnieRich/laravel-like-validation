@@ -1,7 +1,6 @@
-import { describe, expect, test, vi } from "vitest";
+import { describe, expect, test, vi, afterEach } from "vitest";
 import Validation from '../../src/facades/Validation';
 import ValidationError from "../../src/errors/ValidationError";
-import { afterEach } from "node:test";
 import ValidationFactory from "../../src/factories/ValidationFactory";
 
 const validation = {
@@ -118,7 +117,7 @@ describe("Errors", () => {
         }));
     });
 
-    test("should pass if the validation rules are an empty array", async () => {
+    test("should throw an error if the validation rules are an empty array", async () => {
         const middleware = Validation.make(emptyRulesArray);
         const req = { body: data.invalid.body };
         const res = {};
