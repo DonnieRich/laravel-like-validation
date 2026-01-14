@@ -5,7 +5,7 @@ class Prohibited extends BaseRule {
 
     async validate(data: { [s: string]: any }, field: string): Promise<boolean> {
 
-        if (data[field] === null || typeof data['field'] === 'undefined') {
+        if (data[field] === null || typeof data[field] === 'undefined') {
             return true;
         }
 

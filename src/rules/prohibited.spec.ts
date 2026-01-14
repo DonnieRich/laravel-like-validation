@@ -11,10 +11,10 @@ describe("Prohibited", () => {
         expect(result).toBe(true);
     });
 
-    it("Should pass when field is null", async () => {
+    it("Should pass when content is null", async () => {
         const rule = new Prohibited();
 
-        const result = await rule.validate({ field: null }, "field");
+        const result = await rule.validate({ content: null }, "content");
 
         expect(result).toBe(true);
     });
