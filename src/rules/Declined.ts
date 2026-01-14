@@ -4,7 +4,25 @@ class Declined extends BaseRule {
     protected error = 'The {field} field must be declined';
 
     async validate(data: { [s: string]: any }, field: string): Promise<boolean> {
-        return data[field] === false || data[field].toLowerCase() === 'false' || data[field] === 0 || data[field] === '0' || data[field].toLowerCase() === 'no' || data[field].toLowerCase() === 'off';
+
+        if (data[field] === null || typeof data[field] === 'undefined') {
+            return false;
+        }
+
+        if (typeof data[field] === 'boolean') {
+            return data[field] === false;
+        }
+
+        if (typeof data[field] === 'number') {
+            return data[field] === 0;
+        }
+
+        if (typeof data[field] === 'string') {
+            const lowerValue = data[field].toLowerCase();
+            return lowerValue === 'false' || lowerValue === '0' || lowerValue === 'no' || lowerValue === 'off';
+        }
+
+        return false;
     }
 
     message(field: string, message: string = ''): { name: string; message: string } {

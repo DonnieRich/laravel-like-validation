@@ -15,6 +15,8 @@ import CastBoolean from "../rules/CastBoolean.js";
 import Present from "../rules/Present.js";
 import Between from "../rules/Between.js";
 import Declined from "../rules/Declined.js";
+import Prohibited from "../rules/Prohibited.js";
+import ProhibitedIf from "../rules/ProhibitedIf.js";
 
 abstract class BaseValidationSet implements IValidationSet {
     protected rules: RulesSet;
@@ -38,6 +40,8 @@ abstract class BaseValidationSet implements IValidationSet {
         const present = new Present();
         const between = new Between();
         const declined = new Declined();
+        const prohibited = new Prohibited();
+        const prohibitedIf = new ProhibitedIf();
 
         return {
             [required.getName()]: required,
@@ -54,6 +58,8 @@ abstract class BaseValidationSet implements IValidationSet {
             [present.getName()]: present,
             [between.getName()]: between,
             [declined.getName()]: declined,
+            [prohibited.getName()]: prohibited,
+            [prohibitedIf.getName()]: prohibitedIf,
         };
     }
 

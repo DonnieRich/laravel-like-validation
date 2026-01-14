@@ -49,7 +49,7 @@ class Between extends BaseRule {
         return false;
     }
 
-    validate(data: { [s: string]: any }, field: string, value?: string): boolean {
+    validate(data: { [s: string]: any }, field: string, value?: string): Promise<boolean> {
 
         const [min, max] = this.getMinMaxValues(value);
 

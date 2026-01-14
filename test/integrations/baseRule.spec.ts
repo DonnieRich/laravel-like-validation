@@ -25,6 +25,13 @@ describe('BaseRule.parseValue', () => {
         expect(r.callParse(undefined)).toEqual([])
     })
 
+    test('returns array for array values', () => {
+        const r = new ExposedRule()
+        expect(r.callParse([])).toEqual([])
+        expect(r.callParse([1, 2])).toEqual([1, 2])
+        expect(r.callParse(['1', '2'])).toEqual(['1', '2'])
+    })
+
     test('returns stringified value for non-string non-array values', () => {
         const r = new ExposedRule()
         expect(r.callParse(123)).toEqual(['123'])
