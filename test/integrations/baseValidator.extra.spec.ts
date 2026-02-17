@@ -199,8 +199,16 @@ describe('BaseValidator extra branches', () => {
 
         await middleware(req, res, next);
 
-        expect(next).toHaveBeenCalledWith(expect.objectContaining({ status: 500 }));
-        expect(next).toHaveBeenCalledWith(expect.objectContaining({ errors: '' }));
+        expect(next).toHaveBeenCalledWith(expect.objectContaining({ status: 422 }));
+        expect(next).toHaveBeenCalledWith(expect.objectContaining({ 
+            errors: {
+                body: {
+                    title: {
+                        "123": "Invalid rule 123 applied to title"
+                    }
+                }
+            } 
+        }));
 
     });
 
